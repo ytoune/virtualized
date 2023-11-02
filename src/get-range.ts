@@ -1,4 +1,4 @@
-import type { Positions } from './interfaces'
+import type { Sizes } from './interfaces'
 
 const isArray: (arr: unknown) => arr is readonly unknown[] = Array.isArray
 
@@ -16,14 +16,24 @@ const binarySearch = (N: number, ask: (i: number) => boolean): number => {
   return ok
 }
 
-export const getIndex = (s: Positions, offset: number, end = false): number => {
+const positionsCaches = new WeakMap<readonly number[], number[]>()
+
+export const getIndex = (s: Sizes, offset: number, end = false): number => {
   const count = s.length
   if (count) {
     let val: number
     if (isArray(s)) {
+      let p = positionsCaches.get(s)
+      if (!p) {
+        p = []
+        let t = 0
+        for (const u of s) p.push((t += u))
+        positionsCaches.set(s, p)
+      }
+      const positions = p
       val = end
-        ? binarySearch(count, i => offset <= s[i]!) + 1
-        : binarySearch(count, i => offset < s[i]!)
+        ? binarySearch(count, i => offset <= positions[i]!) + 1
+        : binarySearch(count, i => offset < positions[i]!)
     } else {
       val = end ? ceil(offset / s.size) : floor(offset / s.size)
     }
@@ -33,7 +43,7 @@ export const getIndex = (s: Positions, offset: number, end = false): number => {
 }
 
 export const getRange = (
-  sizes: Positions,
+  sizes: Sizes,
   innerSize: number,
   scrollOffset: number,
   scrollDirection: boolean | 'backward' | 'forward',

@@ -1,4 +1,4 @@
-import type { CellStyle, Positions, Sticky } from './interfaces'
+import type { CellStyle, Sizes, Sticky } from './interfaces'
 
 const sum = (q: number, w: number) => q + w
 const lift = (list: readonly number[], value: number | undefined) =>
@@ -31,7 +31,7 @@ const cellStyleMaker =
 
 const isArray: (arr: unknown) => arr is readonly unknown[] = Array.isArray
 
-const getTotal = (sizes: Positions) => {
+const getTotal = (sizes: Sizes) => {
   if (isArray(sizes)) {
     const list = sizes
     const total = sizes.reduce(sum, 0)
@@ -62,22 +62,19 @@ type InnerStyle = {
 }
 
 type FormatProps = Readonly<{
-  rowPositions: Positions
-  colPositions: Positions
+  rowSizes: Sizes
+  colSizes: Sizes
 }>
 export type Format = Readonly<{
   innerStyle: InnerStyle
   outerStyle: typeof outerStyle
-  rowPositions: Positions
-  colPositions: Positions
+  rowSizes: Sizes
+  colSizes: Sizes
   cell: (area: Area, sticky?: Sticky) => CellStyle
 }>
-export const createFormat = ({
-  rowPositions,
-  colPositions,
-}: FormatProps): Format => {
-  const { total: height, list: rows } = getTotal(rowPositions)
-  const { total: width, list: cols } = getTotal(colPositions)
+export const createFormat = ({ rowSizes, colSizes }: FormatProps): Format => {
+  const { total: height, list: rows } = getTotal(rowSizes)
+  const { total: width, list: cols } = getTotal(colSizes)
   const template = `${toTemplate(rows)} / ${toTemplate(cols)}`
   const innerStyle: InnerStyle = {
     width: `${width}px`,
@@ -86,5 +83,5 @@ export const createFormat = ({
     gridTemplate: template,
   }
   const cell = cellStyleMaker({ rows, cols })
-  return { innerStyle, outerStyle, rowPositions, colPositions, cell }
+  return { innerStyle, outerStyle, rowSizes, colSizes, cell }
 }

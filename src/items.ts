@@ -15,19 +15,19 @@ export const createItems = <T>(
   sticky: Sticky,
   renderItem: RenderItem<T>,
 ): T[] => {
-  const { colPositions, rowPositions, cell } = format
-  const colCount = colPositions.length
-  const rowCount = rowPositions.length
+  const { colSizes, rowSizes, cell } = format
+  const colCount = colSizes.length
+  const rowCount = rowSizes.length
   const items: T[] = []
   if (rowCount && colCount) {
     const rowRange = getRange(
-      rowPositions,
+      rowSizes,
       scroll.clientHeight,
       scroll.top,
       scroll.topDirection,
     )
     const colRange = getRange(
-      colPositions,
+      colSizes,
       scroll.clientWidth,
       scroll.left,
       scroll.leftDirection,

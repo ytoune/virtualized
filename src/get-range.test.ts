@@ -23,12 +23,14 @@ describe('getIndex', () => {
     [[{ length: 5, size: 10 }, 20, true], 2],
     [[{ length: 5, size: 10 }, 21, true], 3],
     [[{ length: 5, size: 10 }, 60, true], 5],
+    [[[80, 120, 160, 40, 40, 40], 250], 2],
+    [[[80, 120, 160, 40, 40, 40], 250 + 796, true], 6],
   ]
   const make2 = (args: Parameters<typeof getIndex>) => {
     const args2 = args.slice() as typeof args
     const sizes = args[0]
     if (!isArray(sizes)) {
-      args2[0] = Array.from(sizes, (_, i) => (i + 1) * sizes.size)
+      args2[0] = Array(sizes.length).fill(sizes.size)
       return args2
     }
   }

@@ -9,12 +9,12 @@ import { createFormat, createItems, withScroll } from '@ytoune/virtualized'
 import type { RenderItem, Sizes, Sticky } from '@ytoune/virtualized'
 
 export type GridProps = Readonly<{
-  rowPositions: Positions
-  colPositions: Positions
+  rowSizes: Sizes
+  colSizes: Sizes
   renderItem: RenderItem<JSX.Element>
   sticky: Sticky
 }>
-export const Grid = ({ colPositions, rowPositions, renderItem, sticky }: GridProps) => {
+export const Grid = ({ colSizes, rowSizes, renderItem, sticky }: GridProps) => {
   const wrap = useRef<HTMLDivElement>(null)
   const sc = useRef(null as null | ReturnType<typeof withScroll>)
   sc.current ||= withScroll({
@@ -25,8 +25,8 @@ export const Grid = ({ colPositions, rowPositions, renderItem, sticky }: GridPro
   const [scroll, setScroll] = useState(init)
   useEffect(subscribe, [])
   const format = useMemo(
-    () => createFormat({ colPositions, rowPositions }),
-    [colPositions, rowPositions],
+    () => createFormat({ colSizes, rowSizes }),
+    [colSizes, rowSizes],
   )
   const items = useMemo(
     () => createItems(format, scroll, sticky, renderItem),
@@ -61,8 +61,8 @@ const span = () => (text: string | null, s: CellStyle) => (
 const chars = [...'abcdefghijklmnopqrstuvwxyz']
 export const App = () =>
   <Grid
-    rowPositions={{ size: 16 * 1.5, length: 100000 }}
-    colPositions={[120, 80, 80, 80, 80, 80]}
+    rowSizes={{ size: 16 * 1.5, length: 100000 }}
+    colSizes={[120, 80, 80, 80, 80, 80]}
     renderItem={(r, c, s) => {
       if (r && c) return span(chars[(r + c - 2) % chars.length]!, s)
       if (r) return span(`r${r}`, s)

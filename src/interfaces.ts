@@ -1,6 +1,6 @@
 export type Sticky = Readonly<{ r?: number; c?: number }> | null
 
-export type Positions =
+export type Sizes =
   | Readonly<{ size: number; length: number }>
   | readonly number[]
 
