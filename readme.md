@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { createFormat, createItems, withScroll } from '@ytoune/virtualized'
-import type { RenderItem, Sizes, Sticky } from '@ytoune/virtualized/interfaces'
+import type { RenderItem, Sizes, Sticky } from '@ytoune/virtualized'
 
 export type GridProps = Readonly<{
   rowPositions: Positions
