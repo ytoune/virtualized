@@ -1,0 +1,7 @@
+/dist
+/node_modules
+/.cache
+/.next
+/.swc
+/scripts/sandbox**
+/yarn-error.log*

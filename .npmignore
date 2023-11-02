@@ -1,0 +1,9 @@
+/.vscode
+/.editorconfig
+/.eslintignore
+/.eslintrc.yml
+/.yarnrc
+/src
+/tsconfig.json
+/yarn.lock
+/prepublish.sh
