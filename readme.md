@@ -2,13 +2,11 @@
 
 ## usage
 
-```typescript
+```jsx
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { createFormat, createItems, withScroll } from '@ytoune/virtualized'
 import type { RenderItem, Sizes, Sticky } from '@ytoune/virtualized/interfaces'
-
-const emptyArr = [] as const
 
 export type GridProps = Readonly<{
   rowPositions: Positions
@@ -25,7 +23,7 @@ export const Grid = ({ colPositions, rowPositions, renderItem, sticky }: GridPro
   })
   const { init, onScroll, subscribe } = sc.current
   const [scroll, setScroll] = useState(init)
-  useEffect(subscribe, emptyArr)
+  useEffect(subscribe, [])
   const format = useMemo(
     () => createFormat({ colPositions, rowPositions }),
     [colPositions, rowPositions],
@@ -38,4 +36,39 @@ export const Grid = ({ colPositions, rowPositions, renderItem, sticky }: GridPro
     <div style={format.innerStyle}>{items}</div>
   </div>
 }
+```
+
+```jsx
+import type { CellStyle } from '@ytoune/virtualized/interfaces'
+import { Grid } from './grid'
+
+const fontSize = 16
+const span = () => (text: string | null, s: CellStyle) => (
+  <span
+    style={{
+      lineHeight: `${fontSize * 1.5}px`,
+      textAlign: 'end',
+      color: '#000',
+      background: '#fff',
+      ...s,
+    }}
+    key={s.gridArea}
+  >
+    {text}
+  </span>
+)
+
+const chars = [...'abcdefghijklmnopqrstuvwxyz']
+export const App = () =>
+  <Grid
+    rowPositions={{ size: 16 * 1.5, length: 100000 }}
+    colPositions={[120, 80, 80, 80, 80, 80]}
+    renderItem={(r, c, s) => {
+      if (r && c) return span(chars[(r + c - 2) % chars.length]!, s)
+      if (r) return span(`r${r}`, s)
+      if (c) return span(`c${c}`, s)
+      return span(null, s)
+    }}
+    sticky={{ r: 0, c: 2 }}
+  />
 ```
