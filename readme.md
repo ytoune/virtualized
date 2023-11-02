@@ -11,12 +11,12 @@ import type { RenderItem, Sizes, Sticky } from '@ytoune/virtualized/interfaces'
 const emptyArr = [] as const
 
 export type GridProps = Readonly<{
-  colWidths: Sizes
-  rowHeights: Sizes
+  rowPositions: Positions
+  colPositions: Positions
   renderItem: RenderItem<JSX.Element>
   sticky: Sticky
 }>
-export const Grid = ({ colWidths, rowHeights, renderItem, sticky }: GridProps) => {
+export const Grid = ({ colPositions, rowPositions, renderItem, sticky }: GridProps) => {
   const wrap = useRef<HTMLDivElement>(null)
   const sc = useRef(null as null | ReturnType<typeof withScroll>)
   sc.current ||= withScroll({
@@ -27,8 +27,8 @@ export const Grid = ({ colWidths, rowHeights, renderItem, sticky }: GridProps) =
   const [scroll, setScroll] = useState(init)
   useEffect(subscribe, emptyArr)
   const format = useMemo(
-    () => createFormat({ colWidths, rowHeights }),
-    [colWidths, rowHeights],
+    () => createFormat({ colPositions, rowPositions }),
+    [colPositions, rowPositions],
   )
   const items = useMemo(
     () => createItems(format, scroll, sticky, renderItem),
