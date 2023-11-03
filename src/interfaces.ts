@@ -1,4 +1,5 @@
-export type Sticky = Readonly<{ r?: number; c?: number }> | null
+export type StickyPosition = number | readonly number[] | ReadonlySet<number>
+export type Sticky = Readonly<{ r?: StickyPosition; c?: StickyPosition }> | null
 
 export type Sizes =
   | Readonly<{ size: number; length: number }>

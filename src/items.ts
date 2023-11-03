@@ -1,12 +1,31 @@
 import type { Format } from './format'
 import { getRange } from './get-range'
-import type { RenderItem, Sticky } from './interfaces'
+import type { RenderItem, Sticky, StickyPosition } from './interfaces'
 import type { Scroll } from './with-scroll'
 
-const iter = function* ([b, e]: readonly [number, number], s?: number) {
-  for (let i = b; i < e; ++i)
-    if (void 0 === s || s < i) yield [i, void 0] as const
-  if (void 0 !== s) for (let i = 0; i <= s; ++i) yield [i, i] as const
+const isArray: (arr: unknown) => arr is readonly unknown[] = Array.isArray
+
+const positionsCaches = new WeakMap<readonly number[], ReadonlySet<number>>()
+
+const iter = function* ([b, e]: readonly [number, number], s?: StickyPosition) {
+  if (void 0 === s) {
+    for (let i = b; i < e; ++i) yield [i, void 0] as const
+    return
+  }
+  if ('number' === typeof s) {
+    for (let i = b; i < e; ++i) if (s < i) yield [i, void 0] as const
+    for (let i = 0; i <= s; ++i) yield [i, i] as const
+    return
+  }
+  if (isArray(s)) {
+    let u = positionsCaches.get(s)
+    if (!u) positionsCaches.set(s, (u = new Set(s)))
+    for (let i = b; i < e; ++i) if (!u.has(i)) yield [i, void 0] as const
+    for (const i of s) yield [i, i] as const
+    return
+  }
+  for (let i = b; i < e; ++i) if (!s.has(i)) yield [i, void 0] as const
+  for (const i of s) yield [i, i] as const
 }
 
 export const createItems = <T>(

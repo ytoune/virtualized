@@ -1,5 +1,6 @@
-import type { CellStyle, Sizes, Sticky } from './interfaces'
+import type { CellStyle, Sizes } from './interfaces'
 
+type Sticky = Readonly<{ r?: number; c?: number }> | null
 const sum = (q: number, w: number) => q + w
 const lift = (list: readonly number[], value: number | undefined) =>
   void 0 !== value && (`${list.slice(0, value).reduce(sum, 0)}px` as const)
