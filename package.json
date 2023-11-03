@@ -1,6 +1,6 @@
 {
   "name": "@ytoune/virtualized",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "utility for efficiently rendering large lists and tabular data",
   "author": {
     "name": "ytoune"
@@ -12,23 +12,23 @@
   "unpkg": "./dist/index.umd.js",
   "exports": {
     ".": {
-      "require": "./dist/index.cjs",
+      "require": "./dist/index.js",
       "default": "./dist/index.modern.mjs"
     },
     "./format": {
-      "require": "./dist/format.cjs",
+      "require": "./dist/format.js",
       "default": "./dist/format.modern.mjs"
     },
     "./items": {
-      "require": "./dist/items.cjs",
+      "require": "./dist/items.js",
       "default": "./dist/items.modern.mjs"
     },
     "./with-scroll": {
-      "require": "./dist/with-scroll.cjs",
+      "require": "./dist/with-scroll.js",
       "default": "./dist/with-scroll.modern.mjs"
     }
   },
-  "main": "dist/index.cjs",
+  "main": "dist/index.js",
   "module": "dist/index.module.js",
   "types": "dist/index.d.ts",
   "publishConfig": {
