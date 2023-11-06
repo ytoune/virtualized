@@ -12,6 +12,13 @@ const getDirection = (
 ): false | 'backward' | 'forward' =>
   prev < next ? 'forward' : prev > next ? 'backward' : false
 
+interface HTMLElement {
+  readonly scrollLeft: number
+  readonly scrollTop: number
+  readonly clientWidth: number
+  readonly clientHeight: number
+}
+
 type Unsubscribe = () => void
 type ScrollProps = Readonly<{
   divRef: () => HTMLElement | null
