@@ -14,21 +14,27 @@ const getGridArea = (area: Area): AreaString => {
   return `${r + 1}/${c + 1}/${r + 2}/${c + 2}`
 }
 
-const cellStyleMaker =
-  ({ rows, cols }: { rows: readonly number[]; cols: readonly number[] }) =>
-  (area: Area, sticky: Sticky = null): CellStyle => {
-    const style: CellStyle = { gridArea: getGridArea(area) }
-    if (sticky) {
-      const top = lift(rows, sticky.r)
-      const left = lift(cols, sticky.c)
-      if (top || left) {
-        style.position = 'sticky'
-        if (top) style.top = top
-        if (left) style.left = left
+type GetCellStyle = (area: Area, sticky?: Sticky) => CellStyle
+
+const cellStyleMaker = (
+  { rows, cols }: { rows: readonly number[]; cols: readonly number[] },
+  areaOnly: boolean | undefined,
+): GetCellStyle =>
+  areaOnly
+    ? area => ({ gridArea: getGridArea(area) })
+    : (area, sticky) => {
+        const style: CellStyle = { gridArea: getGridArea(area) }
+        if (sticky) {
+          const top = lift(rows, sticky.r)
+          const left = lift(cols, sticky.c)
+          if (top || left) {
+            style.position = 'sticky'
+            if (top) style.top = top
+            if (left) style.left = left
+          }
+        }
+        return style
       }
-    }
-    return style
-  }
 
 const isArray: (arr: unknown) => arr is readonly unknown[] = Array.isArray
 
@@ -65,15 +71,20 @@ type InnerStyle = {
 type FormatProps = Readonly<{
   rowSizes: Sizes
   colSizes: Sizes
+  areaOnly?: boolean
 }>
 export type Format = Readonly<{
   innerStyle: InnerStyle
   outerStyle: typeof outerStyle
   rowSizes: Sizes
   colSizes: Sizes
-  cell: (area: Area, sticky?: Sticky) => CellStyle
+  cell: GetCellStyle
 }>
-export const createFormat = ({ rowSizes, colSizes }: FormatProps): Format => {
+export const createFormat = ({
+  rowSizes,
+  colSizes,
+  areaOnly,
+}: FormatProps): Format => {
   const { total: height, list: rows } = getTotal(rowSizes)
   const { total: width, list: cols } = getTotal(colSizes)
   const template = `${toTemplate(rows)} / ${toTemplate(cols)}`
@@ -83,6 +94,6 @@ export const createFormat = ({ rowSizes, colSizes }: FormatProps): Format => {
     display: 'grid',
     gridTemplate: template,
   }
-  const cell = cellStyleMaker({ rows, cols })
+  const cell = cellStyleMaker({ rows, cols }, areaOnly)
   return { innerStyle, outerStyle, rowSizes, colSizes, cell }
 }
