@@ -1,9 +1,21 @@
 import type { CellStyle, Sizes } from './interfaces'
 
+const isArray: (arr: unknown) => arr is readonly unknown[] = Array.isArray
+
+const sum = (arr: readonly number[], len = arr.length) => {
+  const len2 = Math.min(arr.length, len)
+  let sum = 0
+  for (let i = 0; i < len2; ++i) sum += arr[i]!
+  return sum
+}
+
 type Sticky = Readonly<{ r?: number; c?: number }> | null
-const sum = (q: number, w: number) => q + w
-const lift = (list: readonly number[], value: number | undefined) =>
-  void 0 !== value && (`${list.slice(0, value).reduce(sum, 0)}px` as const)
+const lift = (list: Sizes, value: number | undefined) => {
+  if (void 0 !== value) {
+    if (isArray(list)) return `${sum(list, value)}px` as const
+    return `${Math.min(list.length, value) * list.size}px` as const
+  }
+}
 
 type AreaString = `${number}/${number}/${number}/${number}`
 type Area = AreaString | readonly [r: number, c: number]
@@ -17,7 +29,7 @@ const getGridArea = (area: Area): AreaString => {
 type GetCellStyle = (area: Area, sticky?: Sticky) => CellStyle
 
 const cellStyleMaker = (
-  { rows, cols }: { rows: readonly number[]; cols: readonly number[] },
+  { rows, cols }: { rows: Sizes; cols: Sizes },
   areaOnly: boolean | undefined,
 ): GetCellStyle =>
   areaOnly
@@ -36,22 +48,16 @@ const cellStyleMaker = (
         return style
       }
 
-const isArray: (arr: unknown) => arr is readonly unknown[] = Array.isArray
-
 const getTotal = (sizes: Sizes) => {
-  if (isArray(sizes)) {
-    const list = sizes
-    const total = sizes.reduce(sum, 0)
-    return { list, total } as const
-  }
+  if (isArray(sizes)) return sum(sizes)
   const { length: count, size } = sizes
-  const list = Array<number>(count).fill(size)
-  const total = count * size
-  return { list, total } as const
+  return count * size
 }
 
-const toTemplate = (list: readonly number[]) =>
-  list.map(s => `${s}px`).join(' ')
+const toTemplate = (sizes: Sizes) => {
+  if (isArray(sizes)) return sizes.map(s => `${s}px`).join(' ')
+  return `repeat(${sizes.length}, ${sizes.size}px)`
+}
 
 const outerStyle = {
   width: '100%',
@@ -81,12 +87,12 @@ export type Format = Readonly<{
   cell: GetCellStyle
 }>
 export const createFormat = ({
-  rowSizes,
-  colSizes,
+  rowSizes: rows,
+  colSizes: cols,
   areaOnly,
 }: FormatProps): Format => {
-  const { total: height, list: rows } = getTotal(rowSizes)
-  const { total: width, list: cols } = getTotal(colSizes)
+  const height = getTotal(rows)
+  const width = getTotal(cols)
   const template = `${toTemplate(rows)} / ${toTemplate(cols)}`
   const innerStyle: InnerStyle = {
     width: `${width}px`,
@@ -95,5 +101,5 @@ export const createFormat = ({
     gridTemplate: template,
   }
   const cell = cellStyleMaker({ rows, cols }, areaOnly)
-  return { innerStyle, outerStyle, rowSizes, colSizes, cell }
+  return { innerStyle, outerStyle, rowSizes: rows, colSizes: cols, cell }
 }
