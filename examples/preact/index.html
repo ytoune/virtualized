@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <link rel="dns-prefetch" href="https://unpkg.com" />
+  <script type="importmap">
+    {
+      "imports": {
+        "preact": "https://unpkg.com/htm/preact/standalone.module.js",
+        "preact/hooks": "https://unpkg.com/htm/preact/standalone.module.js",
+        "htm/preact": "https://unpkg.com/htm/preact/standalone.module.js",
+        "@ytoune/virtualized": "https://unpkg.com/@ytoune/virtualized/dist/index.module.js"
+      }
+    }
+  </script>
+  <link
+    rel="modulepreload"
+    href="https://unpkg.com/htm/preact/standalone.module.js"
+  />
+  <link
+    rel="modulepreload"
+    href="https://unpkg.com/@ytoune/virtualized/dist/index.module.js"
+  />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <script type="module">
+    import { render } from 'preact'
+    import { useRef, useState, useEffect, useMemo } from 'preact/hooks'
+    import { html } from 'htm/preact'
+    import { withScroll, createFormat, createItems } from '@ytoune/virtualized'
+
+    const Grid = ({ colSizes, rowSizes, renderItem, sticky }) => {
+      const wrap = useRef(null)
+      const sc = useRef(null)
+      sc.current ||= withScroll({
+        divRef: () => wrap.current,
+        set: f => setScroll(f),
+      })
+      const { init, onScroll, subscribe } = sc.current
+      const [scroll, setScroll] = useState(init)
+      useEffect(subscribe, [])
+      const format = useMemo(
+        () => createFormat({ colSizes, rowSizes }),
+        [colSizes, rowSizes],
+      )
+      const items = useMemo(
+        () => createItems(format, scroll, sticky, renderItem),
+        [format, scroll, sticky, renderItem],
+      )
+      return html`
+        <div ref=${wrap} style=${format.outerStyle} onScroll=${onScroll}>
+          <div style=${format.innerStyle}>${items}</div>
+        </div>
+      `
+    }
+    const fontSize = 16
+    const lineHeight = fontSize * 1.5
+    const span = (text, s) => html`
+      <span
+        style=${{
+          lineHeight: `${lineHeight}px`,
+          textAlign: 'end',
+          color: '#000',
+          background: '#fff',
+          ...s,
+        }}
+        key=${s.gridArea}
+      >
+        ${text}
+      </span>
+    `
+    const chars = [...'abcdefghijklmnopqrstuvwxyz']
+    const sticky = { r: [0, 7, 14], c: 0 }
+    const App = () => html`
+      <${Grid}
+        rowSizes=${{ size: lineHeight, length: 250_0000 }}
+        colSizes=${[120, ...Array(150).fill(80)]}
+        renderItem=${(r, c, s) => {
+          s.background = (r + c) % 2 ? '#eee' : '#fff'
+          const top = sticky.r.indexOf(r)
+          if (-1 !== top) {
+            s.top = `${lineHeight * top}px`
+            s.color = 'red'
+          }
+          if (c <= sticky.c) s.color = 'blue'
+          if (r && c) return span(chars[(r + c - 2) % chars.length], s)
+          if (r) return span(`r${r}`, s)
+          if (c) return span(`c${c}`, s)
+          return span(null, s)
+        }}
+        sticky=${sticky}
+      />
+    `
+    render(
+      html`
+        <div
+          style=${{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+          }}
+        >
+          <${App} />
+        </div>
+      `,
+      document.body,
+    )
+  </script>
+</html>
