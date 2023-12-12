@@ -1,5 +1,7 @@
 # virtualized
 
+CSS Grid を利用した仮想スクロール実装用ユーティリティ
+
 ## usage
 
 ```jsx
@@ -39,7 +41,7 @@ export const Grid = ({ colSizes, rowSizes, renderItem, sticky }: GridProps) => {
 ```
 
 ```jsx
-import type { CellStyle } from '@ytoune/virtualized/interfaces'
+import type { CellStyle } from '@ytoune/virtualized'
 import { Grid } from './grid'
 
 const fontSize = 16
@@ -61,7 +63,7 @@ const span = () => (text: string | null, s: CellStyle) => (
 const chars = [...'abcdefghijklmnopqrstuvwxyz']
 export const App = () =>
   <Grid
-    rowSizes={{ size: 16 * 1.5, length: 100000 }}
+    rowSizes={{ size: fontSize * 1.5, length: 100_000 }}
     colSizes={[120, 80, 80, 80, 80, 80]}
     renderItem={(r, c, s) => {
       if (r && c) return span(chars[(r + c - 2) % chars.length]!, s)

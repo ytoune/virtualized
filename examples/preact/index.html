@@ -78,7 +78,7 @@
     const sticky = { r: [0, 7, 14], c: 0 }
     const App = () => html`
       <${Grid}
-        rowSizes=${{ size: lineHeight, length: 250_0000 }}
+        rowSizes=${{ size: lineHeight, length: 2_500_000 }}
         colSizes=${[120, ...Array(150).fill(80)]}
         renderItem=${(r, c, s) => {
           s.background = (r + c) % 2 ? '#eee' : '#fff'
