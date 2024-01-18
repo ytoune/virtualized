@@ -33,11 +33,6 @@
     "source.fixAll.eslint": "explicit"
   },
   "eslint.enable": true,
-  "eslint.nodePath": "node_modules",
-  "eslint.options": {
-    "overrideConfigFile": ".eslintrc.yml",
-    "resolvePluginsRelativeTo": "node_modules"
-  },
   "eslint.workingDirectories": ["*"],
   "editor.rulers": [80],
   "typescript.tsdk": "node_modules/typescript/lib"

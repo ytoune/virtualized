@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
 import { createFormat } from './format'
 import type { CellStyle } from './interfaces'
 import { createItems } from './items'

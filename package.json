@@ -126,7 +126,8 @@
         "error",
         "always",
         {
-          "exceptRange": true
+          "exceptRange": true,
+          "onlyEquality": true
         }
       ],
       "complexity": [

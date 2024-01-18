@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { createFormat, createItems, withScroll } from './index'
-import type { RenderItem, Sizes, Sticky } from './index'
+import type { RenderItem } from './index'
 
 interface HTMLElement {
   readonly scrollLeft: number
