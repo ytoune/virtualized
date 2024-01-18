@@ -52,8 +52,6 @@
   "license": "MIT",
   "scripts": {
     "build": "unbuild && microbundle -f umd --generateTypes=false --no-sourcemap",
-    "build2": "rimraf dist && microbundle -f umd --generateTypes=false --no-sourcemap",
-    "/build2": "rimraf dist && microbundle build && microbundle -i src/format.ts -o dist/format.js && microbundle -i src/items.ts -o dist/items.js && microbundle -i src/with-scroll.ts -o dist/with-scroll.js",
     "test": "eslint \"**/*.ts\" --ignore-path .gitignore && tsc --noEmit && vitest run --passWithNoTests",
     "ts-node": "node -r esbuild-register"
   },

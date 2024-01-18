@@ -1,3 +1,5 @@
+import { describe, it, expect } from 'vitest'
+
 import { createFormat } from './format'
 import type { CellStyle } from './interfaces'
 import { createItems } from './items'

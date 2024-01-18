@@ -1,3 +1,5 @@
+import { it, expect } from 'vitest'
+
 import { createFormat, createItems, withScroll } from './index'
 import type { RenderItem } from './index'
 
