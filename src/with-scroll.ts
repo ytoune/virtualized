@@ -66,7 +66,7 @@ export const withScroll = ({ divRef, set }: ScrollProps) => {
   }
   const subscribe = (): Unsubscribe => {
     onScroll()
-    window.addEventListener('resize', onScroll)
+    window.addEventListener('resize', onScroll, { passive: true })
     return () => {
       window.removeEventListener('resize', onScroll)
     }
