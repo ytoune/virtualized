@@ -17,8 +17,8 @@ export type Scroll = Readonly<{
   left: number
   clientHeight: number
   clientWidth: number
-  topDirection: boolean | 'backward' | 'forward'
-  leftDirection: boolean | 'backward' | 'forward'
+  topDirection: false | 'backward' | 'forward'
+  leftDirection: false | 'backward' | 'forward'
 }>
 export const withScroll = ({ divRef, set }: ScrollProps) => {
   const init: Scroll = {

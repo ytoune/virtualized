@@ -26,7 +26,7 @@ describe('createItems', () => {
     clientWidth: 10,
     topDirection: false,
     leftDirection: false,
-  }
+  } as const
   const list: {
     title: string
     args: Parameters<typeof createItems<string>>
