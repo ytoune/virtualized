@@ -1,5 +1,7 @@
 import { getDirection, tryOr } from './utils'
 
+const { floor, min, max } = Math
+
 interface HTMLElement {
   readonly scrollLeft: number
   readonly scrollTop: number
@@ -8,6 +10,10 @@ interface HTMLElement {
 }
 
 type Unsubscribe = () => void
+
+const screenHeight = () => tryOr(() => window.screen.height, 1 / 0)
+const screenWidth = () => tryOr(() => window.screen.width, 1 / 0)
+
 type ScrollProps = Readonly<{
   divRef: () => HTMLElement | null
   set: (f: (scroll: Scroll) => Scroll) => void
@@ -24,8 +30,8 @@ export const withScroll = ({ divRef, set }: ScrollProps) => {
   const init: Scroll = {
     top: 0,
     left: 0,
-    clientHeight: tryOr(() => window.innerHeight, 1 / 0),
-    clientWidth: tryOr(() => window.innerWidth, 1 / 0),
+    clientHeight: screenHeight(),
+    clientWidth: screenWidth(),
     topDirection: false,
     leftDirection: false,
   }
@@ -33,14 +39,16 @@ export const withScroll = ({ divRef, set }: ScrollProps) => {
     const div = divRef()
     if (div)
       set(e => {
-        const left = Math.max(Math.floor(div.scrollLeft), 0)
-        const top = Math.max(Math.floor(div.scrollTop), 0)
-        const clientWidth = Math.floor(div.clientWidth)
-        const clientHeight = Math.floor(div.clientHeight)
+        const left = max(floor(div.scrollLeft), 0)
+        const top = max(floor(div.scrollTop), 0)
+        const clientWidth = min(floor(div.clientWidth), screenWidth())
+        const clientHeight = min(floor(div.clientHeight), screenHeight())
         return top !== e.top ||
           left !== e.left ||
           clientHeight !== e.clientHeight ||
-          clientWidth !== e.clientWidth
+          clientWidth !== e.clientWidth ||
+          false !== e.topDirection ||
+          false !== e.leftDirection
           ? {
               top,
               left,

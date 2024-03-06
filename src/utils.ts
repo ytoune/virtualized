@@ -1,6 +1,7 @@
 /** @internal */
-export const isArray: (arr: unknown) => arr is readonly unknown[] =
-  Array.isArray
+export const {
+  isArray,
+}: { readonly isArray: (arr: unknown) => arr is readonly unknown[] } = Array
 
 /**
  * めぐる式二分探索
