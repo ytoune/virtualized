@@ -60,7 +60,7 @@
     }
     const fontSize = 16
     const lineHeight = fontSize * 1.5
-    const span = (text, s) => html`
+    const span = (text, s, k) => html`
       <span
         style=${{
           lineHeight: `${lineHeight}px`,
@@ -69,7 +69,7 @@
           background: '#fff',
           ...s,
         }}
-        key=${s.gridArea}
+        key=${k}
       >
         ${text}
       </span>
@@ -81,6 +81,7 @@
         rowSizes=${{ size: lineHeight, length: 2_500_000 }}
         colSizes=${[120, ...Array(150).fill(80)]}
         renderItem=${(r, c, s) => {
+          const k = `${r}:${c}`
           s.background = (r + c) % 2 ? '#eee' : '#fff'
           const top = sticky.r.indexOf(r)
           if (-1 !== top) {
@@ -88,10 +89,10 @@
             s.color = 'red'
           }
           if (c <= sticky.c) s.color = 'blue'
-          if (r && c) return span(chars[(r + c - 2) % chars.length], s)
-          if (r) return span(`r${r}`, s)
-          if (c) return span(`c${c}`, s)
-          return span(null, s)
+          if (r && c) return span(chars[(r + c - 2) % chars.length], s, k)
+          if (r) return span(`r${r}`, s, k)
+          if (c) return span(`c${c}`, s, k)
+          return span(null, s, k)
         }}
         sticky=${sticky}
       />
