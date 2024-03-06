@@ -16,14 +16,11 @@ const iter = function* ([b, e]: readonly [number, number], s?: StickyPosition) {
     for (let i = 0; i <= s; ++i) yield [i, i] as const
     return
   }
-  if (isArray(s)) {
-    let u = positionsCaches.get(s)
-    if (!u) positionsCaches.set(s, (u = new Set(s)))
-    for (let i = b; i < e; ++i) if (!u.has(i)) yield [i, void 0] as const
-    for (const i of s) yield [i, i] as const
-    return
-  }
-  for (let i = b; i < e; ++i) if (!s.has(i)) yield [i, void 0] as const
+  let u: ReadonlySet<number> | undefined
+  if (isArray(s))
+    (u = positionsCaches.get(s)) || positionsCaches.set(s, (u = new Set(s)))
+  else u = s
+  for (let i = b; i < e; ++i) if (!u.has(i)) yield [i, void 0] as const
   for (const i of s) yield [i, i] as const
 }
 
