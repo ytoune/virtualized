@@ -1,6 +1,6 @@
 {
   "name": "@ytoune/virtualized",
-  "version": "2.4.1",
+  "version": "2.5.0",
   "description": "utility for efficiently rendering large lists and tabular data",
   "author": {
     "name": "ytoune"
