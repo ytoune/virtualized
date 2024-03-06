@@ -55,8 +55,16 @@ export const withScroll = ({ divRef, set }: ScrollProps) => {
   const subscribe = (): Unsubscribe => {
     onScroll()
     window.addEventListener('resize', onScroll, { passive: true })
+    const div = divRef()
+    const observer = new ResizeObserver(onScroll)
+    try {
+      if (div instanceof Element) observer.observe(div)
+    } catch {
+      // pass
+    }
     return () => {
       window.removeEventListener('resize', onScroll)
+      observer.disconnect()
     }
   }
   return { init, onScroll, subscribe } as const
