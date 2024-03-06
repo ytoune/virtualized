@@ -1,13 +1,5 @@
 import type { CellStyle, Sizes } from './interfaces'
-
-const isArray: (arr: unknown) => arr is readonly unknown[] = Array.isArray
-
-const sum = (arr: readonly number[], len = arr.length) => {
-  const len2 = Math.min(arr.length, len)
-  let sum = 0
-  for (let i = 0; i < len2; ++i) sum += arr[i]!
-  return sum
-}
+import { isArray, sum } from './utils'
 
 type Sticky = Readonly<{ r?: number; c?: number }> | null
 const lift = (list: Sizes, value: number | undefined) => {

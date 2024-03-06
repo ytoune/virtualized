@@ -1,20 +1,7 @@
 import type { Sizes } from './interfaces'
-
-const isArray: (arr: unknown) => arr is readonly unknown[] = Array.isArray
+import { binarySearch, isArray } from './utils'
 
 const { min, max, floor, ceil } = Math
-
-/** めぐる式二分探索 */
-const binarySearch = (N: number, ask: (i: number) => boolean): number => {
-  let ng = -1
-  let ok = N
-  while (ok - ng > 1) {
-    const m = (ng + ok) >> 1 // = floor((ng + ok) / 2)
-    if (ask(m)) ok = m
-    else ng = m
-  }
-  return ok
-}
 
 const positionsCaches = new WeakMap<readonly number[], number[]>()
 

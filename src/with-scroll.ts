@@ -1,16 +1,4 @@
-const tryOr = <T>(f: () => T, v: T) => {
-  try {
-    return f()
-  } catch {
-    return v
-  }
-}
-
-const getDirection = (
-  next: number,
-  prev: number,
-): false | 'backward' | 'forward' =>
-  prev < next ? 'forward' : prev > next ? 'backward' : false
+import { getDirection, tryOr } from './utils'
 
 interface HTMLElement {
   readonly scrollLeft: number

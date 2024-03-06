@@ -1,9 +1,8 @@
 import type { Format } from './format'
 import { getRange } from './get-range'
 import type { RenderItem, Sticky, StickyPosition } from './interfaces'
+import { isArray } from './utils'
 import type { Scroll } from './with-scroll'
-
-const isArray: (arr: unknown) => arr is readonly unknown[] = Array.isArray
 
 const positionsCaches = new WeakMap<readonly number[], ReadonlySet<number>>()
 
