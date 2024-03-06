@@ -4,56 +4,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Document</title>
   <link rel="dns-prefetch" href="https://unpkg.com" />
-  <script type="importmap">
-    {
-      "imports": {
-        "preact": "https://unpkg.com/htm/preact/standalone.module.js",
-        "preact/hooks": "https://unpkg.com/htm/preact/standalone.module.js",
-        "htm/preact": "https://unpkg.com/htm/preact/standalone.module.js",
-        "@ytoune/virtualized": "https://unpkg.com/@ytoune/virtualized/dist/index.module.js"
-      }
-    }
-  </script>
   <link
-    rel="modulepreload"
-    href="https://unpkg.com/htm/preact/standalone.module.js"
+    rel="preload"
+    href="https://unpkg.com/htm/preact/standalone.umd.js"
+    as="script"
   />
   <link
-    rel="modulepreload"
-    href="https://unpkg.com/@ytoune/virtualized/dist/index.module.js"
+    rel="preload"
+    href="https://unpkg.com/@ytoune/virtualized/dist/index.umd.js"
+    as="script"
   />
+  <script src="https://unpkg.com/htm/preact/standalone.umd.js"></script>
+  <script src="https://unpkg.com/@ytoune/virtualized/dist/index.umd.js"></script>
   <style>
-    body {
+    main {
       margin: 0;
       padding: 0;
     }
   </style>
-  <script type="module">
-    import { render } from 'preact'
-    import { useRef, useState, useEffect, useMemo } from 'preact/hooks'
-    import { html } from 'htm/preact'
-    import { withScroll, createFormat, createItems } from '@ytoune/virtualized'
+  <main></main>
+  <script>
+    const { render } = htmPreact
+    const { useRef, useState, useEffect, useMemo } = htmPreact
+    const { html } = htmPreact
+    const { withScroll, createFormat, createItems } = virtualized
+    const emptyArray = []
 
     const Grid = ({ colSizes, rowSizes, renderItem, sticky }) => {
       const wrap = useRef(null)
-      const sc = useRef(null)
-      sc.current ||= withScroll({
-        divRef: () => wrap.current,
-        set: f => setScroll(f),
-      })
-      const { init, onScroll, subscribe } = sc.current
+      const { init, onScroll, subscribe } = (useRef(null).current ||=
+        withScroll({ divRef: () => wrap.current, set: f => setScroll(f) }))
       const [scroll, setScroll] = useState(init)
-      useEffect(subscribe, [])
+      useEffect(subscribe, emptyArray)
       const format = useMemo(
-        () => createFormat({ colSizes, rowSizes }),
+        () => createFormat({ colSizes, rowSizes, areaOnly: true }),
         [colSizes, rowSizes],
       )
       const items = useMemo(
         () => createItems(format, scroll, sticky, renderItem),
         [format, scroll, sticky, renderItem],
       )
+      console.log({ ...scroll }, { ...format })
       return html`
-        <div ref=${wrap} style=${format.outerStyle} onScroll=${onScroll}>
+        <div ref=${wrap} style=${format.outerStyle}>
           <div style=${format.innerStyle}>${items}</div>
         </div>
       `
@@ -75,43 +68,43 @@
       </span>
     `
     const chars = [...'abcdefghijklmnopqrstuvwxyz']
+    const rowSizes = { size: lineHeight, length: 2_500_000 }
+    const colSizes = [120, ...Array(150).fill(80)]
+    const renderItem = (r, c, s) => {
+      const k = `${r}:${c}`
+      s.background = (r + c) % 2 ? '#eee' : '#fff'
+      const top = sticky.r.indexOf(r)
+      if (-1 !== top) {
+        s.position = 'sticky'
+        s.top = `${lineHeight * top}px`
+        s.color = 'red'
+      }
+      if (c <= sticky.c) {
+        s.position = 'sticky'
+        s.left = '0'
+        s.color = 'blue'
+      }
+      if (r && c) return span(chars[(r + c - 2) % chars.length], s, k)
+      if (r) return span(`r${r}`, s, k)
+      if (c) return span(`c${c}`, s, k)
+      return span(null, s, k)
+    }
     const sticky = { r: [0, 7, 14], c: 0 }
     const App = () => html`
       <${Grid}
-        rowSizes=${{ size: lineHeight, length: 2_500_000 }}
-        colSizes=${[120, ...Array(150).fill(80)]}
-        renderItem=${(r, c, s) => {
-          const k = `${r}:${c}`
-          s.background = (r + c) % 2 ? '#eee' : '#fff'
-          const top = sticky.r.indexOf(r)
-          if (-1 !== top) {
-            s.top = `${lineHeight * top}px`
-            s.color = 'red'
-          }
-          if (c <= sticky.c) s.color = 'blue'
-          if (r && c) return span(chars[(r + c - 2) % chars.length], s, k)
-          if (r) return span(`r${r}`, s, k)
-          if (c) return span(`c${c}`, s, k)
-          return span(null, s, k)
-        }}
+        rowSizes=${rowSizes}
+        colSizes=${colSizes}
+        renderItem=${renderItem}
         sticky=${sticky}
       />
     `
     render(
       html`
-        <div
-          style=${{
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-          }}
-        >
+        <div style=${{ position: 'absolute', inset: 0 }}>
           <${App} />
         </div>
       `,
-      document.body,
+      document.querySelector('main'),
     )
   </script>
 </html>
