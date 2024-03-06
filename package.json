@@ -46,7 +46,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:ytoune/virtualized.git"
+    "url": "git+ssh://git@github.com/ytoune/virtualized.git"
   },
   "homepage": "https://github.com/ytoune/virtualized",
   "license": "MIT",
