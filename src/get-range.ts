@@ -34,9 +34,8 @@ export const getRange = (
   innerSize: number,
   scrollOffset: number,
   scrollDirection: boolean | 'backward' | 'forward',
+  overscanCount = 20,
 ): readonly [number, number] => {
-  const overscanCount = 20
-
   const count = sizes.length
 
   if (0 === count) return [0, 0]

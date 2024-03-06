@@ -32,6 +32,7 @@ export const createItems = <T>(
   scroll: Scroll,
   sticky: Sticky,
   renderItem: RenderItem<T>,
+  overscanCount = 20,
 ): T[] => {
   const { colSizes, rowSizes, cell } = format
   const colCount = colSizes.length
@@ -43,12 +44,14 @@ export const createItems = <T>(
       scroll.clientHeight,
       scroll.top,
       scroll.topDirection,
+      overscanCount,
     )
     const colRange = getRange(
       colSizes,
       scroll.clientWidth,
       scroll.left,
       scroll.leftDirection,
+      overscanCount,
     )
     for (const [r, q] of iter(rowRange, sticky?.r))
       for (const [c, p] of iter(colRange, sticky?.c)) {
