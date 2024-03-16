@@ -1,6 +1,5 @@
-import type { Format } from './format'
 import { getRange } from './get-range'
-import type { RenderItem, Sticky, StickyPosition } from './interfaces'
+import type { RenderItem, Sizes, Sticky, StickyPosition } from './interfaces'
 import { isArray } from './utils'
 import type { Scroll } from './with-scroll'
 
@@ -11,59 +10,71 @@ const getCached = (k: readonly number[]) => {
   return v
 }
 
-const createIter = (
+const createIterImpl = (
   [b, e]: readonly [number, number],
   s?: StickyPosition,
-): ((cb: (i: number, p?: number) => void) => void) => {
+): ((cb: (i: number, p?: true) => void) => void) => {
   if (void 0 === s)
     return (cb: (i: number) => void) => {
       for (let i = b; i < e; ++i) cb(i)
     }
   if ('number' === typeof s)
-    return (cb: (i: number, p?: number) => void) => {
+    return (cb: (i: number, p?: true) => void) => {
       for (let i = b; i < e; ++i) if (s < i) cb(i)
-      for (let i = 0; i <= s; ++i) cb(i, i)
+      for (let i = 0; i <= s; ++i) cb(i, true)
     }
   const u: ReadonlySet<number> = isArray(s) ? getCached(s) : s
-  return (cb: (i: number, p?: number) => void) => {
+  return (cb: (i: number, p?: true) => void) => {
     for (let i = b; i < e; ++i) if (!u.has(i)) cb(i)
-    for (const i of s) cb(i, i)
+    for (const i of s) cb(i, true)
   }
 }
 
+export const createIdxIter = (
+  sizes: Sizes,
+  innerSize: number,
+  scrollOffset: number,
+  scrollDirection: boolean | 'backward' | 'forward',
+  stickyPosition: StickyPosition | undefined,
+  overscanCount = 20,
+) =>
+  createIterImpl(
+    getRange(sizes, innerSize, scrollOffset, scrollDirection, overscanCount),
+    stickyPosition,
+  )
+
+type Format = Readonly<{
+  rowSizes: Sizes
+  colSizes: Sizes
+  sticky?: Sticky
+}>
 export const createItems = <T>(
-  format: Format,
+  { colSizes, rowSizes, sticky }: Format,
   scroll: Scroll,
-  sticky: Sticky,
   renderItem: RenderItem<T>,
   overscanCount = 20,
 ): T[] => {
-  const { colSizes, rowSizes, cell } = format
   const items: T[] = []
   if (rowSizes.length && colSizes.length) {
-    const rowIter = createIter(
-      getRange(
-        rowSizes,
-        scroll.clientHeight,
-        scroll.top,
-        scroll.topDirection,
-        overscanCount,
-      ),
+    const rowIter = createIdxIter(
+      rowSizes,
+      scroll.clientHeight,
+      scroll.top,
+      scroll.topDirection,
       sticky?.r,
+      overscanCount,
     )
-    const colIter = createIter(
-      getRange(
-        colSizes,
-        scroll.clientWidth,
-        scroll.left,
-        scroll.leftDirection,
-        overscanCount,
-      ),
+    const colIter = createIdxIter(
+      colSizes,
+      scroll.clientWidth,
+      scroll.left,
+      scroll.leftDirection,
       sticky?.c,
+      overscanCount,
     )
     rowIter((r, q) => {
       colIter((c, p) => {
-        const el = renderItem(r, c, cell([r, c], { c: p, r: q }))
+        const el = renderItem(r, c, q, p)
         if (el) items.push(el)
       })
     })

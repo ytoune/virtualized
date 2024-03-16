@@ -1,4 +1,4 @@
-import { getDirection, tryOr } from './utils'
+import { getDirection } from './utils'
 
 const { floor, min, max } = Math
 
@@ -11,8 +11,20 @@ interface HTMLElement {
 
 type Unsubscribe = () => void
 
-const screenHeight = () => tryOr(() => window.screen.height, 1 / 0)
-const screenWidth = () => tryOr(() => window.screen.width, 1 / 0)
+const screenHeight = (): number => {
+  try {
+    return window.screen.height
+  } catch {
+    return 1 / 0
+  }
+}
+const screenWidth = (): number => {
+  try {
+    return window.screen.width
+  } catch {
+    return 1 / 0
+  }
+}
 
 type ScrollProps = Readonly<{
   divRef: () => HTMLElement | null

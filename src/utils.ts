@@ -23,23 +23,6 @@ export const binarySearch = (
 }
 
 /** @internal */
-export const sum = (arr: readonly number[], len = arr.length) => {
-  const len2 = Math.min(arr.length, len)
-  let sum = 0
-  for (let i = 0; i < len2; ++i) sum += arr[i]!
-  return sum
-}
-
-/** @internal */
-export const tryOr = <T>(f: () => T, v: T) => {
-  try {
-    return f()
-  } catch {
-    return v
-  }
-}
-
-/** @internal */
 export const getDirection = (
   next: number,
   prev: number,

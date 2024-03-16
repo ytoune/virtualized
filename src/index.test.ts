@@ -1,6 +1,6 @@
 import { it, expect } from 'vitest'
 
-import { createFormat, createItems, withScroll } from './index'
+import { createContainerStyles, createItems, withScroll } from './index'
 import type { RenderItem } from './index'
 
 interface HTMLElement {
@@ -11,8 +11,8 @@ interface HTMLElement {
 }
 
 it('main', () => {
-  const item: RenderItem<string> = (r, c, s) =>
-    JSON.stringify([r, c, s.gridArea, s.top, s.left])
+  const item = ((r: number, c: number, rs?: true, cs?: true) =>
+    JSON.stringify([r, c, rs, cs])) satisfies RenderItem<string>
   const { init, onScroll } = withScroll({
     divRef: () => div,
     set: s => {
@@ -21,26 +21,44 @@ it('main', () => {
   })
   let div: HTMLElement | null = null
   let scroll = init
-  const format = createFormat({
+  const sizes = {
     rowSizes: { size: 4, length: 5 },
     colSizes: { size: 8, length: 3 },
+  } as const
+  const format = createContainerStyles(sizes)
+  expect(format).toEqual({
+    innerStyle: {
+      width: '24px',
+      height: '20px',
+      display: 'grid',
+      gridTemplateRows: 'repeat(5, 4px)',
+      gridTemplateColumns: 'repeat(3, 8px)',
+      gridTemplateAreas: 'none',
+    },
+    outerStyle: {
+      width: '100%',
+      height: '100%',
+      overflow: 'scroll',
+      margin: 0,
+      padding: 0,
+    },
   })
-  expect(createItems(format, scroll, null, item)).toEqual([
-    item(0, 0, { gridArea: '1/1/2/2' }),
-    item(0, 1, { gridArea: '1/2/2/3' }),
-    item(0, 2, { gridArea: '1/3/2/4' }),
-    item(1, 0, { gridArea: '2/1/3/2' }),
-    item(1, 1, { gridArea: '2/2/3/3' }),
-    item(1, 2, { gridArea: '2/3/3/4' }),
-    item(2, 0, { gridArea: '3/1/4/2' }),
-    item(2, 1, { gridArea: '3/2/4/3' }),
-    item(2, 2, { gridArea: '3/3/4/4' }),
-    item(3, 0, { gridArea: '4/1/5/2' }),
-    item(3, 1, { gridArea: '4/2/5/3' }),
-    item(3, 2, { gridArea: '4/3/5/4' }),
-    item(4, 0, { gridArea: '5/1/6/2' }),
-    item(4, 1, { gridArea: '5/2/6/3' }),
-    item(4, 2, { gridArea: '5/3/6/4' }),
+  expect(createItems(sizes, scroll, item)).toEqual([
+    item(0, 0),
+    item(0, 1),
+    item(0, 2),
+    item(1, 0),
+    item(1, 1),
+    item(1, 2),
+    item(2, 0),
+    item(2, 1),
+    item(2, 2),
+    item(3, 0),
+    item(3, 1),
+    item(3, 2),
+    item(4, 0),
+    item(4, 1),
+    item(4, 2),
   ])
   div = {
     scrollTop: 0,
@@ -49,16 +67,16 @@ it('main', () => {
     clientWidth: 10,
   }
   onScroll()
-  expect(createItems(format, scroll, null, item)).toEqual([
-    item(0, 0, { gridArea: '1/1/2/2' }),
-    item(0, 1, { gridArea: '1/2/2/3' }),
-    item(0, 2, { gridArea: '1/3/2/4' }),
-    item(1, 0, { gridArea: '2/1/3/2' }),
-    item(1, 1, { gridArea: '2/2/3/3' }),
-    item(1, 2, { gridArea: '2/3/3/4' }),
-    item(2, 0, { gridArea: '3/1/4/2' }),
-    item(2, 1, { gridArea: '3/2/4/3' }),
-    item(2, 2, { gridArea: '3/3/4/4' }),
+  expect(createItems(sizes, scroll, item)).toEqual([
+    item(0, 0),
+    item(0, 1),
+    item(0, 2),
+    item(1, 0),
+    item(1, 1),
+    item(1, 2),
+    item(2, 0),
+    item(2, 1),
+    item(2, 2),
   ])
   div = {
     scrollTop: 9,
@@ -67,19 +85,19 @@ it('main', () => {
     clientWidth: 10,
   }
   onScroll()
-  expect(createItems(format, scroll, null, item)).toEqual([
-    item(1, 0, { gridArea: '2/1/3/2' }),
-    item(1, 1, { gridArea: '2/2/3/3' }),
-    item(1, 2, { gridArea: '2/3/3/4' }),
-    item(2, 0, { gridArea: '3/1/4/2' }),
-    item(2, 1, { gridArea: '3/2/4/3' }),
-    item(2, 2, { gridArea: '3/3/4/4' }),
-    item(3, 0, { gridArea: '4/1/5/2' }),
-    item(3, 1, { gridArea: '4/2/5/3' }),
-    item(3, 2, { gridArea: '4/3/5/4' }),
-    item(4, 0, { gridArea: '5/1/6/2' }),
-    item(4, 1, { gridArea: '5/2/6/3' }),
-    item(4, 2, { gridArea: '5/3/6/4' }),
+  expect(createItems(sizes, scroll, item)).toEqual([
+    item(1, 0),
+    item(1, 1),
+    item(1, 2),
+    item(2, 0),
+    item(2, 1),
+    item(2, 2),
+    item(3, 0),
+    item(3, 1),
+    item(3, 2),
+    item(4, 0),
+    item(4, 1),
+    item(4, 2),
   ])
   div = {
     scrollTop: 18,
@@ -88,10 +106,10 @@ it('main', () => {
     clientWidth: 2,
   }
   onScroll()
-  expect(createItems(format, scroll, null, item)).toEqual([
-    item(3, 1, { gridArea: '4/2/5/3' }),
-    item(3, 2, { gridArea: '4/3/5/4' }),
-    item(4, 1, { gridArea: '5/2/6/3' }),
-    item(4, 2, { gridArea: '5/3/6/4' }),
+  expect(createItems(sizes, scroll, item)).toEqual([
+    item(3, 1),
+    item(3, 2),
+    item(4, 1),
+    item(4, 2),
   ])
 })

@@ -15,5 +15,6 @@ export type CellStyle = {
 export type RenderItem<T> = (
   row: number,
   col: number,
-  style: CellStyle,
+  isStickyRow: true | undefined,
+  isStickyCol: true | undefined,
 ) => T | null
