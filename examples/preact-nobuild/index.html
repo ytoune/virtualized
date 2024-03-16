@@ -28,7 +28,7 @@
     const { render } = htmPreact
     const { useRef, useState, useEffect, useMemo } = htmPreact
     const { html } = htmPreact
-    const { withScroll, createFormat, createItems, createItemStyle } =
+    const { withScroll, createContainerStyles, createItems, createItemStyle } =
       virtualized
     const emptyArray = []
 
@@ -39,7 +39,7 @@
       const [scroll, setScroll] = useState(init)
       useEffect(subscribe, emptyArray)
       const format = useMemo(
-        () => createFormat({ colSizes, rowSizes }),
+        () => createContainerStyles({ colSizes, rowSizes }),
         [colSizes, rowSizes],
       )
       const items = useMemo(
