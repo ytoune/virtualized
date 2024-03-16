@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { createItems } from './items'
-import type { RenderItem } from './interfaces'
+import type { RenderItem, Sizes } from './interfaces'
 
 const item = ((r: number, c: number, rs?: true, cs?: true) =>
   JSON.stringify([r, c, rs, cs])) satisfies RenderItem<string>
@@ -17,6 +17,7 @@ const item = ((r: number, c: number, rs?: true, cs?: true) =>
 // }
 
 describe('createItems', () => {
+  const e = (o: unknown) => JSON.stringify(o).replace(/"/giu, '')
   const scroll = {
     top: 0,
     left: 0,
@@ -56,6 +57,72 @@ describe('createItems', () => {
   for (const { title, args, ret } of list) {
     it(title, () => {
       expect(createItems(...args)).toEqual(ret)
+    })
+  }
+  const list2: {
+    title?: string
+    sizes: Sizes
+    offset: number
+    clientSize: number
+    direction?: false | 'backward' | 'forward'
+    ret: [start: number, end: number]
+  }[] = [
+    {
+      sizes: { size: 4, length: 15 },
+      offset: 0,
+      clientSize: 5,
+      ret: [0, 2],
+    },
+    {
+      sizes: { size: 4, length: 15 },
+      offset: 0,
+      clientSize: 60,
+      ret: [0, 14],
+    },
+    {
+      sizes: { size: 4, length: 15 },
+      offset: 0,
+      clientSize: 4,
+      ret: [0, 1],
+    },
+    {
+      sizes: { size: 4, length: 15 },
+      offset: 10,
+      clientSize: 5,
+      ret: [1, 4],
+    },
+    {
+      sizes: { size: 4, length: 15 },
+      offset: 10,
+      clientSize: 60,
+      ret: [1, 14],
+    },
+  ]
+  for (const {
+    title,
+    sizes,
+    offset,
+    clientSize,
+    direction = false,
+    ret: [start, end],
+  } of list2) {
+    it(`${title ? `${title}: ` : ''}${e({ sizes, offset, clientSize })}`, () => {
+      const ret: string[] = []
+      for (let i = start; i <= end; ++i) ret.push(item(i, 0))
+      expect(
+        createItems(
+          { rowSizes: sizes, colSizes: { size: 24, length: 1 } },
+          {
+            top: offset,
+            left: 0,
+            clientHeight: clientSize,
+            clientWidth: 24,
+            topDirection: direction,
+            leftDirection: false,
+          },
+          item,
+        ),
+      ).toEqual(ret)
     })
   }
 })
