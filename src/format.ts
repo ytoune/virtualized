@@ -22,6 +22,28 @@ type AreaString = `${number}/${number}/${number}/${number}`
 const getGridArea = (row: number, col: number): AreaString =>
   `${row + 1}/${col + 1}/${row + 2}/${col + 2}`
 
+type LiftMemoTuple = readonly [
+  Sizes,
+  StickyPosition | undefined,
+  { v: ReturnType<typeof lift> }[],
+]
+
+const liftMemo = {
+  row: new Map<number, LiftMemoTuple>(),
+  col: new Map<number, LiftMemoTuple>(),
+} as const
+const memoizedLift = (
+  key: 'row' | 'col',
+  idx: number,
+  list: Sizes,
+  pos: StickyPosition | undefined,
+) => {
+  const map = liftMemo[key]
+  let v = map.get(idx)
+  if (!(v && v[0] === list && v[1] === pos)) v = [list, pos, []]
+  return (v[2][idx] ??= { v: lift(idx, list, pos) }).v
+}
+
 export const createItemStyle = (
   row: number,
   col: number,
@@ -37,8 +59,8 @@ export const createItemStyle = (
 ): CellStyle => {
   const style: CellStyle = { gridArea: getGridArea(row, col) }
   if (sticky) {
-    const top = lift(row, rowSizes, sticky.r)
-    const left = lift(col, colSizes, sticky.c)
+    const top = memoizedLift('row', row, rowSizes, sticky.r)
+    const left = memoizedLift('col', col, colSizes, sticky.c)
     if (top || left) {
       style.position = 'sticky'
       if (top) style.top = top
