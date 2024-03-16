@@ -1,13 +1,7 @@
+import type { HTMLElement } from './interfaces'
 import { getDirection } from './utils'
 
 const { floor, min, max } = Math
-
-interface HTMLElement {
-  readonly scrollLeft: number
-  readonly scrollTop: number
-  readonly clientWidth: number
-  readonly clientHeight: number
-}
 
 type Unsubscribe = () => void
 

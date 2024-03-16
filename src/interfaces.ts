@@ -18,3 +18,10 @@ export type RenderItem<T> = (
   isStickyRow: true | undefined,
   isStickyCol: true | undefined,
 ) => T | null
+
+export interface HTMLElement {
+  readonly scrollLeft: number
+  readonly scrollTop: number
+  readonly clientWidth: number
+  readonly clientHeight: number
+}

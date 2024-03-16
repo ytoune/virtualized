@@ -1,14 +1,8 @@
 import { it, expect } from 'vitest'
 
+import type { HTMLElement } from './interfaces'
 import { createContainerStyles, createItems, withScroll } from './index'
 import type { RenderItem } from './index'
-
-interface HTMLElement {
-  readonly scrollLeft: number
-  readonly scrollTop: number
-  readonly clientWidth: number
-  readonly clientHeight: number
-}
 
 it('main', () => {
   const item = ((r: number, c: number, rs?: true, cs?: true) =>
