@@ -36,10 +36,10 @@ export const createIdxIter = (
   scrollOffset: number,
   scrollDirection: boolean | 'backward' | 'forward',
   stickyPosition: StickyPosition | undefined,
-  overscanCount = 20,
+  overscanSize?: number,
 ) =>
   createIterImpl(
-    getRange(sizes, innerSize, scrollOffset, scrollDirection, overscanCount),
+    getRange(sizes, innerSize, scrollOffset, scrollDirection, overscanSize),
     stickyPosition,
   )
 
@@ -52,7 +52,7 @@ export const createItems = <T>(
   { colSizes, rowSizes, sticky }: Format,
   scroll: Scroll,
   renderItem: RenderItem<T>,
-  overscanCount = 20,
+  overscanSize?: number,
 ): T[] => {
   const items: T[] = []
   if (rowSizes.length && colSizes.length) {
@@ -62,7 +62,7 @@ export const createItems = <T>(
       scroll.top,
       scroll.topDirection,
       sticky?.r,
-      overscanCount,
+      overscanSize,
     )
     const colIter = createIdxIter(
       colSizes,
@@ -70,7 +70,7 @@ export const createItems = <T>(
       scroll.left,
       scroll.leftDirection,
       sticky?.c,
-      overscanCount,
+      overscanSize,
     )
     rowIter((r, q) => {
       colIter((c, p) => {
