@@ -194,7 +194,7 @@ const sumLimit = (sizes: Sizes, idx: number): number => {
 
 /** @internal */
 const getTemplate = (pre: number, sizes: Sizes, start: number, end: number) => {
-  const p = sumLimit(sizes, start) - pre
+  const p = sumLimit(sizes, start) - pre || 0
   if (isArray(sizes))
     return `${p}px ${sizes
       .slice(start, end)

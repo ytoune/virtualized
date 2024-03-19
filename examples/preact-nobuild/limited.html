@@ -38,7 +38,7 @@
         () =>
           createVirtualized({
             pin: () => {
-              v.render(sticky)
+              const r = v.render(sticky)
               Object.assign(outer.current.style, r.outerStyle)
               Object.assign(inner.current.style, r.innerStyle)
               pin()
@@ -53,7 +53,6 @@
           }),
         [colSizes, rowSizes],
       )
-      // console.log(v)
       useEffect(v.subscribe, [v])
       const r = v.render(sticky)
       const items = r.items(renderItem(r.itemStyle))
@@ -65,10 +64,15 @@
         colRange: r.colRange,
       })
       return html`
-        <div ref=${outer} style=${r.outerStyle}>
-          <div ref=${inner} style=${r.innerStyle}>${items}</div>
+        <div ref=${outer}>
+          <div ref=${inner}>${items}</div>
         </div>
       `
+      // return html`
+      //   <div ref=${outer} style=${r.outerStyle}>
+      //     <div ref=${inner} style=${r.innerStyle}>${items}</div>
+      //   </div>
+      // `
     }
     const fontSize = 16
     const lineHeight = fontSize * 1.5
