@@ -1,4 +1,5 @@
 export * from './format'
 export * from './items'
 export * from './with-scroll'
+export * from './virtualized'
 export type { Sticky, Sizes, CellStyle, RenderItem } from './interfaces'

@@ -107,9 +107,10 @@ type InnerStyle = {
   width: `${number}px`
   height: `${number}px`
   display: 'grid'
-  gridTemplateRows: string
-  gridTemplateColumns: string
-  gridTemplateAreas: 'none'
+  // gridTemplateRows: string
+  // gridTemplateColumns: string
+  // gridTemplateAreas: 'none'
+  gridTemplate: string
 }
 
 type ContainerStylesProps = Readonly<{
@@ -130,9 +131,10 @@ export const createContainerStyles = ({
     width: `${width}px`,
     height: `${height}px`,
     display: 'grid',
-    gridTemplateRows: getTemplate(rows),
-    gridTemplateColumns: getTemplate(cols),
-    gridTemplateAreas: 'none',
+    gridTemplate: `${getTemplate(rows)}/${getTemplate(cols)}`,
+    // gridTemplateRows: getTemplate(rows),
+    // gridTemplateColumns: getTemplate(cols),
+    // gridTemplateAreas: 'none',
   }
   return { innerStyle, outerStyle }
 }

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <link rel="dns-prefetch" href="https://unpkg.com" />
+  <link
+    rel="preload"
+    href="https://unpkg.com/htm@3/preact/standalone.umd.js"
+    as="script"
+  />
+  <!-- <link
+    rel="preload"
+    href="https://unpkg.com/@ytoune/virtualized/dist/index.umd.js"
+    as="script"
+  /> -->
+  <script src="https://unpkg.com/htm@3/preact/standalone.umd.js"></script>
+  <!-- <script src="https://unpkg.com/@ytoune/virtualized/dist/index.umd.js"></script> -->
+  <script src="../../dist/index.umd.js"></script>
+  <style>
+    main {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <main></main>
+  <script>
+    const { render } = htmPreact
+    const { useRef, useReducer, useEffect, useMemo } = htmPreact
+    const { html } = htmPreact
+    const { createVirtualized } = virtualized
+
+    const Grid = ({ colSizes, rowSizes, renderItem, sticky }) => {
+      const outer = useRef(null)
+      const inner = useRef(null)
+      const [s, pin] = useReducer(s => s + 1n, 0n)
+      const v = useMemo(
+        () =>
+          createVirtualized({
+            pin: () => {
+              v.render(sticky)
+              Object.assign(outer.current.style, r.outerStyle)
+              Object.assign(inner.current.style, r.innerStyle)
+              pin()
+            },
+            divRef: () => outer.current,
+            scroll: p => {
+              console.log('scroll', p)
+              outer.current?.scroll(p)
+            },
+            rowSizes,
+            colSizes,
+          }),
+        [colSizes, rowSizes],
+      )
+      // console.log(v)
+      useEffect(v.subscribe, [v])
+      const r = v.render(sticky)
+      const items = r.items(renderItem(r.itemStyle))
+      console.log({
+        top: Math.floor(outer.current?.scrollTop ?? 0),
+        'items.length': items.length,
+        ...r.innerStyle,
+        rowRange: r.rowRange,
+        colRange: r.colRange,
+      })
+      return html`
+        <div ref=${outer} style=${r.outerStyle}>
+          <div ref=${inner} style=${r.innerStyle}>${items}</div>
+        </div>
+      `
+    }
+    const fontSize = 16
+    const lineHeight = fontSize * 1.5
+    const span = (text, s, k) => html`
+      <span
+        style=${{
+          lineHeight: `${lineHeight}px`,
+          textAlign: 'end',
+          color: '#000',
+          background: '#fff',
+          ...s,
+        }}
+        key=${k}
+      >
+        ${text}
+      </span>
+    `
+    const chars = [...'abcdefghijklmnopqrstuvwxyz']
+    const rowSizes = { size: lineHeight, length: 2_500_000 }
+    // const colSizes = [120, ...Array(150).fill(80)]
+    const colSizes = [120, 80, 80]
+    // const sticky = { r: [0, 7, 14], c: 0 }
+    const sticky = {}
+    const sizes = { rowSizes, colSizes, sticky }
+    const renderItem = itemStyle => (r, c) => {
+      const k = `${r}:${c}`
+      const s = {
+        ...itemStyle(r, c),
+        background: (r + c) % 2 ? '#eee' : '#fff',
+      }
+      if (s.top) s.color = 'red'
+      if (s.left) s.color = 'blue'
+      // console.log({ r, c, s, k })
+      if (r && c) return span(chars[(r + c - 2) % chars.length], s, k)
+      if (r) return span(`r${r}`, s, k)
+      if (c) return span(`c${c}`, s, k)
+      return span(null, s, k)
+    }
+    const App = () => html`
+      <${Grid}
+        rowSizes=${rowSizes}
+        colSizes=${colSizes}
+        renderItem=${renderItem}
+        sticky=${sticky}
+      />
+    `
+    render(
+      html`
+        <div style=${{ position: 'absolute', inset: 0 }}>
+          <${App} />
+        </div>
+      `,
+      document.querySelector('main'),
+    )
+  </script>
+</html>

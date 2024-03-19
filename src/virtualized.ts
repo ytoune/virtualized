@@ -7,13 +7,13 @@ import type {
   Sticky,
 } from './interfaces'
 import { isArray } from './utils'
-import { getNextOffset } from './virtual-offset'
+import { getNextOffset } from './next-offset'
 import type { Scroll } from './with-scroll'
 import { getInitted, subscribeImpl, updateScroll } from './with-scroll'
 import { createItemStyle, getTotal, outerStyle } from './format'
 import { createIterImpl } from './items'
 
-const { min, max } = Math
+const { min, max, abs } = Math
 
 export interface ScrollProps {
   readonly top?: number
@@ -39,62 +39,61 @@ export const createVirtualized = ({
   rowSizes,
   colSizes,
 }: VirtualizedProps) => {
-  const virtualRows = virtualizedImpl(rowSizes)
-  const virtualCols = virtualizedImpl(colSizes)
   let virtualScroll: Scroll = getInitted()
   let realScroll: Scroll = virtualScroll
-  let rowOffsets: readonly [current: number, prev: number] = [0, 0]
-  let colOffsets: readonly [current: number, prev: number] = [0, 0]
+  const rowOffsetManager = createOffsetManager(
+    rowSizes,
+    realScroll.top,
+    realScroll.clientHeight,
+  )
+  const colOffsetManager = createOffsetManager(
+    colSizes,
+    realScroll.left,
+    realScroll.clientWidth,
+  )
+  let scrolling = false
+  let lastScrollTop = null as null | number
+  let lastScrollLeft = null as null | number
   const onScroll = () => {
     const div = divRef()
-    if (!div) return
+    if (!div || scrolling) return
     const prev = realScroll
     realScroll = updateScroll(realScroll, div)
     if (prev === realScroll) return
-    const r2 = virtualRows.f(realScroll.top, realScroll.clientHeight)
-    const c2 = virtualCols.f(realScroll.left, realScroll.clientWidth)
-    const prevVRowOffset = virtualScroll.top
-    const prevVColOffset = virtualScroll.left
-    const nextVRowOffset = prevVRowOffset + r2.add
-    const nextVColOffset = prevVColOffset + c2.add
+    const r2 = rowOffsetManager.f(realScroll.top, realScroll.clientHeight)
+    const c2 = colOffsetManager.f(realScroll.left, realScroll.clientWidth)
     virtualScroll = {
-      top: nextVRowOffset,
-      left: nextVColOffset,
+      top: r2.vo,
+      left: c2.vo,
       clientHeight: realScroll.clientHeight,
       clientWidth: realScroll.clientWidth,
       topDirection: realScroll.topDirection,
       leftDirection: realScroll.leftDirection,
     }
-    rowOffsets = [nextVRowOffset, prevVRowOffset]
-    colOffsets = [nextVColOffset, prevVColOffset]
-    if (r2.diff || c2.diff) {
-      const scrollProps: { top?: number; left?: number } = {}
-      if (r2.diff) scrollProps.top = r2.next
-      if (c2.diff) scrollProps.left = c2.next
-      scroll(scrollProps)
-    }
+    scrolling = true
+    const scrollProps: { top?: number; left?: number } = {}
+    if (r2.d && lastScrollTop !== r2.ro) lastScrollTop = scrollProps.top = r2.ro
+    if (c2.d && lastScrollLeft !== c2.ro)
+      lastScrollLeft = scrollProps.left = c2.ro
+    if (scrollProps.top || scrollProps.left) scroll(scrollProps)
     pin()
+    scrolling = false
   }
   const render = (sticky?: Sticky) => {
-    const rowRange = getRange(
-      rowSizes,
-      ...rowOffsets,
-      virtualScroll.clientHeight / 4,
-      virtualScroll.clientHeight,
-    )
-    const colRange = getRange(
-      colSizes,
-      ...colOffsets,
-      virtualScroll.clientWidth / 4,
-      virtualScroll.clientWidth,
-    )
+    const [rowRange, height, preRow] = rowOffsetManager.r()
+    const [colRange, width, preCol] = colOffsetManager.r()
     const innerStyle = {
-      height: `${virtualRows.s}px`,
-      width: `${virtualCols.s}px`,
+      height: `${height}px`,
+      width: `${width}px`,
       display: 'grid',
-      gridTemplateRows: getTemplate(rowSizes, ...rowRange),
-      gridTemplateColumns: getTemplate(colSizes, ...colRange),
-      gridTemplateAreas: 'none',
+      // gridTemplateRows: getTemplate(preRow, rowSizes, ...rowRange),
+      // gridTemplateColumns: getTemplate(preCol, colSizes, ...colRange),
+      // gridTemplateAreas: 'none',
+      gridTemplate: `${getTemplate(
+        preRow,
+        rowSizes,
+        ...rowRange,
+      )}/${getTemplate(preCol, colSizes, ...colRange)}`,
     } as const
     const rowIter = createIterImpl(rowRange, sticky?.r)
     const colIter = createIterImpl(colRange, sticky?.c)
@@ -114,25 +113,57 @@ export const createVirtualized = ({
       `${2 + row - rowRange[0]}/${2 + col - colRange[0]}/${3 + row - rowRange[0]}/${3 + col - colRange[0]}`
     const itemStyle = (row: number, col: number) =>
       createItemStyle(row, col, { rowSizes, colSizes, sticky, getGridArea })
-    return { innerStyle, outerStyle, items, itemStyle, getGridArea } as const
+    return {
+      innerStyle,
+      outerStyle,
+      items,
+      itemStyle,
+      getGridArea,
+      rowRange,
+      colRange,
+    } as const
   }
   const subscribe = () => subscribeImpl(divRef, onScroll)
   return { render, onScroll, subscribe } as const
 }
 
-const virtualizedImpl = (sizes: Sizes) => {
-  const totalSize = getTotal(sizes)
-  let prevOffset = null as null | number
-  const f = (offset: number, clientSize: number) => {
-    const size = min(clientSize * 5, totalSize)
-    const next = getNextOffset(clientSize, totalSize, offset, clientSize, size)
-    const diff = next - offset
-    const prev = null === prevOffset ? next : prevOffset + diff
-    prevOffset = next
-    const add = next - prev
-    return { next, prev, diff, add } as const
+/** @internal */
+const createOffsetManager = (
+  sizes: Sizes,
+  initVirtualOffset: number,
+  initClientSize: number,
+) => {
+  const virtualTotalSize = getTotal(sizes)
+  let vo = initVirtualOffset
+  let ro = null as null | number
+  let ps = null as null | number
+  let range: readonly [start: number, end: number] = [0, 0]
+  let ro2 = null as null | number
+  const f = (realOffset: number, clientSize: number) => {
+    if (null !== ro2 && abs(ro2 - realOffset) <= 2 && ps === clientSize)
+      return { vo, ro, d: false } as const
+    const o = getNextOffset(
+      virtualTotalSize,
+      clientSize,
+      ps ?? clientSize,
+      realOffset,
+      ro ?? realOffset,
+      vo,
+    )
+    ps = clientSize
+    range = getRange(sizes, o[1], vo, ps)
+    ;[ro, vo] = o
+    const d = 2 < abs(ro - realOffset)
+    ro2 = realOffset
+    return { vo, ro, d } as const
   }
-  return { f, s: totalSize } as const
+  const r = () =>
+    [
+      range,
+      min((ps ?? initClientSize) * 5, virtualTotalSize),
+      vo - (ro ?? vo),
+    ] as const
+  return { f, r } as const
 }
 
 /** @internal */
@@ -140,11 +171,10 @@ const getRange = (
   sizes: Sizes,
   current: number,
   prev: number,
-  overscanMin: number,
-  overscanMax: number,
-) => {
-  const startOffset = current + (current < prev ? overscanMax : overscanMin)
-  const endOffset = current + (prev < current ? overscanMax : overscanMin)
+  clientSize: number,
+): readonly [start: number, end: number] => {
+  const startOffset = current - clientSize
+  const endOffset = current + clientSize + clientSize
 
   const startIndex = getIndex(sizes, startOffset)
   const endIndex = getIndex(sizes, endOffset, true)
@@ -163,12 +193,12 @@ const sumLimit = (sizes: Sizes, idx: number): number => {
 }
 
 /** @internal */
-const getTemplate = (sizes: Sizes, start: number, end: number) => {
-  const pre = sumLimit(sizes, start)
+const getTemplate = (pre: number, sizes: Sizes, start: number, end: number) => {
+  const p = sumLimit(sizes, start) - pre
   if (isArray(sizes))
-    return `${pre}px ${sizes
-      .slice(start, end + 1)
+    return `${p}px ${sizes
+      .slice(start, end)
       .map(s => `${s}px`)
       .join(' ')}`
-  return `${pre}px repeat(${1 + end - start}, ${sizes.size}px)`
+  return `${p}px repeat(${end - start}, ${sizes.size}px)`
 }
