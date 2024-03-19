@@ -75,25 +75,23 @@ export const createVirtualized = ({
     if (r2.d && lastScrollTop !== r2.ro) lastScrollTop = scrollProps.top = r2.ro
     if (c2.d && lastScrollLeft !== c2.ro)
       lastScrollLeft = scrollProps.left = c2.ro
-    if (scrollProps.top || scrollProps.left) scroll(scrollProps)
     pin()
-    scrolling = false
+    if (scrollProps.top || scrollProps.left) scroll(scrollProps)
+    Promise.resolve().then(() => (scrolling = false))
   }
   const render = (sticky?: Sticky) => {
     const [rowRange, height, preRow] = rowOffsetManager.r()
     const [colRange, width, preCol] = colOffsetManager.r()
+    const gridTemplateRows = getTemplate(preRow, rowSizes, ...rowRange)
+    const gridTemplateColumns = getTemplate(preCol, colSizes, ...colRange)
     const innerStyle = {
       height: `${height}px`,
       width: `${width}px`,
       display: 'grid',
-      // gridTemplateRows: getTemplate(preRow, rowSizes, ...rowRange),
-      // gridTemplateColumns: getTemplate(preCol, colSizes, ...colRange),
+      // gridTemplateRows,
+      // gridTemplateColumns,
       // gridTemplateAreas: 'none',
-      gridTemplate: `${getTemplate(
-        preRow,
-        rowSizes,
-        ...rowRange,
-      )}/${getTemplate(preCol, colSizes, ...colRange)}`,
+      gridTemplate: `${gridTemplateRows}/${gridTemplateColumns}`,
     } as const
     const rowIter = createIterImpl(rowRange, sticky?.r)
     const colIter = createIterImpl(colRange, sticky?.c)

@@ -26,14 +26,24 @@
   <main></main>
   <script>
     const { render } = htmPreact
-    const { useRef, useReducer, useEffect, useMemo } = htmPreact
+    const { Component, useRef, useReducer, useEffect, useMemo } = htmPreact
     const { html } = htmPreact
     const { createVirtualized } = virtualized
 
-    const Grid = ({ colSizes, rowSizes, renderItem, sticky }) => {
-      const outer = useRef(null)
-      const inner = useRef(null)
-      const [s, pin] = useReducer(s => s + 1n, 0n)
+    const memo = F =>
+      class extends Component {
+        shouldComponentUpdate() {
+          return false
+        }
+        render(props) {
+          return html`
+            <${F} ...${props} />
+          `
+        }
+      }
+
+    const GridContent = memo(({ outer, inner }) => {
+      const [, pin] = useReducer(s => s + 1n, 0n)
       const v = useMemo(
         () =>
           createVirtualized({
@@ -41,12 +51,36 @@
               const r = v.render(sticky)
               Object.assign(outer.current.style, r.outerStyle)
               Object.assign(inner.current.style, r.innerStyle)
+              console.log({
+                top: Math.floor(outer.current?.scrollTop ?? 0),
+                'items.length': items.length,
+                ...r.innerStyle,
+                rowRange: r.rowRange,
+                colRange: r.colRange,
+              })
               pin()
             },
-            divRef: () => outer.current,
+            divRef: () => {
+              // console.log('divRef', Math.floor(outer.current?.scrollTop ?? 0))
+              return outer.current
+            },
             scroll: p => {
-              console.log('scroll', p)
-              outer.current?.scroll(p)
+              let t = 0
+              const f = () => {
+                const div = outer.current
+                if (div && ++t < 10) {
+                  // console.log({ t })
+                  div.scroll(p)
+                  Promise.resolve().then(() => {
+                    if (
+                      (null != p.top && 2 <= Math.abs(div.scrollTop - p.top)) ||
+                      (null != p.left && 2 <= Math.abs(div.scrollLeft - p.left))
+                    )
+                      f()
+                  })
+                }
+              }
+              f()
             },
             rowSizes,
             colSizes,
@@ -54,18 +88,30 @@
         [colSizes, rowSizes],
       )
       useEffect(v.subscribe, [v])
+      // useEffect(() => {
+      //   const r = v.render(sticky)
+      //   Object.assign(outer.current.style, r.outerStyle)
+      //   Object.assign(inner.current.style, r.innerStyle)
+      // }, [])
       const r = v.render(sticky)
       const items = r.items(renderItem(r.itemStyle))
-      console.log({
-        top: Math.floor(outer.current?.scrollTop ?? 0),
-        'items.length': items.length,
-        ...r.innerStyle,
-        rowRange: r.rowRange,
-        colRange: r.colRange,
-      })
+      // console.log({
+      //   top: Math.floor(outer.current?.scrollTop ?? 0),
+      //   'items.length': items.length,
+      //   ...r.innerStyle,
+      //   rowRange: r.rowRange,
+      //   colRange: r.colRange,
+      // })
+      return items
+    })
+    const Grid = ({ colSizes, rowSizes, renderItem, sticky }) => {
+      const outer = useRef(null)
+      const inner = useRef(null)
       return html`
         <div ref=${outer}>
-          <div ref=${inner}>${items}</div>
+          <div ref=${inner}>
+            <${GridContent} outer=${outer} inner=${inner} />
+          </div>
         </div>
       `
       // return html`
