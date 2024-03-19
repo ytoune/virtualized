@@ -2,7 +2,7 @@ import { it, expect } from 'vitest'
 
 import type { HTMLElement } from './interfaces'
 import { createContainerStyles, createItems, withScroll } from './index'
-import type { RenderItem } from './index'
+import type { RenderItem, Scroll } from './index'
 
 it('main', () => {
   const item = ((r: number, c: number, rs?: true, cs?: true) =>
@@ -14,7 +14,7 @@ it('main', () => {
     },
   })
   let div: HTMLElement | null = null
-  let scroll = init
+  let scroll: Scroll = init
   const sizes = {
     rowSizes: { size: 4, length: 5 },
     colSizes: { size: 8, length: 3 },
