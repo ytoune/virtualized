@@ -1,4 +1,10 @@
-import type { CellStyle, Sizes, Sticky, StickyPosition } from './interfaces'
+import type {
+  AreaString,
+  CellStyle,
+  Sizes,
+  Sticky,
+  StickyPosition,
+} from './interfaces'
 import { isArray } from './utils'
 
 const undef = void 0
@@ -18,8 +24,7 @@ const lift = (
   }
 }
 
-type AreaString = `${number}/${number}/${number}/${number}`
-const getGridArea = (row: number, col: number): AreaString =>
+const getGridAreaImpl = (row: number, col: number): AreaString =>
   `${row + 1}/${col + 1}/${row + 2}/${col + 2}`
 
 type LiftMemoTuple = readonly [
@@ -51,10 +56,12 @@ export const createItemStyle = (
     rowSizes,
     colSizes,
     sticky,
+    getGridArea = getGridAreaImpl,
   }: Readonly<{
     rowSizes: Sizes
     colSizes: Sizes
-    sticky: Sticky
+    sticky?: Sticky
+    getGridArea?: (row: number, col: number) => AreaString
   }>,
 ): CellStyle => {
   const style: CellStyle = { gridArea: getGridArea(row, col) }
@@ -70,7 +77,8 @@ export const createItemStyle = (
   return style
 }
 
-const getTotal = (sizes: Sizes) => {
+/** @internal */
+export const getTotal = (sizes: Sizes) => {
   if (isArray(sizes)) {
     let sum = 0
     for (let i = 0; i < sizes.length; ++i) sum += sizes[i]!
@@ -80,12 +88,14 @@ const getTotal = (sizes: Sizes) => {
   return count * size
 }
 
+/** @internal */
 const getTemplate = (sizes: Sizes) => {
   if (isArray(sizes)) return sizes.map(s => `${s}px`).join(' ')
   return `repeat(${sizes.length}, ${sizes.size}px)`
 }
 
-const outerStyle = {
+/** @internal */
+export const outerStyle = {
   width: '100%',
   height: '100%',
   overflow: 'scroll',

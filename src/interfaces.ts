@@ -5,6 +5,8 @@ export type Sizes =
   | Readonly<{ size: number; length: number }>
   | readonly number[]
 
+export type AreaString = `${number}/${number}/${number}/${number}`
+
 export type CellStyle = {
   gridArea: string
   position?: 'sticky'

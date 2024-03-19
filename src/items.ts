@@ -10,7 +10,8 @@ const getCached = (k: readonly number[]) => {
   return v
 }
 
-const createIterImpl = (
+/** @internal */
+export const createIterImpl = (
   [b, e]: readonly [number, number],
   s?: StickyPosition,
 ): ((cb: (i: number, p?: true) => void) => void) => {

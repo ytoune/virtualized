@@ -54,5 +54,6 @@ export const getRange = (
   const startIndex = getIndex(sizes, startOffset)
   const endIndex = getIndex(sizes, endOffset, true)
 
-  return [max(0, min(count - 1, startIndex)), max(0, min(count, endIndex))]
+  return [startIndex, endIndex]
+  // return [max(0, min(count - 1, startIndex)), max(0, min(count, endIndex))]
 }

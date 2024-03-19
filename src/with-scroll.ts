@@ -20,6 +20,40 @@ const screenWidth = (): number => {
   }
 }
 
+/** @internal */
+export const getInitted = () =>
+  ({
+    top: 0,
+    left: 0,
+    clientHeight: screenHeight(),
+    clientWidth: screenWidth(),
+    topDirection: false,
+    leftDirection: false,
+  }) as const satisfies Scroll
+
+/** @internal */
+export const updateScroll = (prevScroll: Scroll, div: HTMLElement): Scroll => {
+  const left = max(floor(div.scrollLeft), 0)
+  const top = max(floor(div.scrollTop), 0)
+  const clientWidth = min(floor(div.clientWidth), screenWidth())
+  const clientHeight = min(floor(div.clientHeight), screenHeight())
+  // false !== prevScroll.topDirection ||
+  // false !== prevScroll.leftDirection ||
+  return top !== prevScroll.top ||
+    left !== prevScroll.left ||
+    clientHeight !== prevScroll.clientHeight ||
+    clientWidth !== prevScroll.clientWidth
+    ? {
+        top,
+        left,
+        clientHeight,
+        clientWidth,
+        topDirection: getDirection(top, prevScroll.top),
+        leftDirection: getDirection(left, prevScroll.left),
+      }
+    : prevScroll
+}
+
 type ScrollProps = Readonly<{
   divRef: () => HTMLElement | null
   set: (f: (scroll: Scroll) => Scroll) => void
@@ -33,38 +67,10 @@ export type Scroll = Readonly<{
   leftDirection: false | 'backward' | 'forward'
 }>
 export const withScroll = ({ divRef, set }: ScrollProps) => {
-  const init: Scroll = {
-    top: 0,
-    left: 0,
-    clientHeight: screenHeight(),
-    clientWidth: screenWidth(),
-    topDirection: false,
-    leftDirection: false,
-  }
+  const init = getInitted()
   const onScroll = () => {
     const div = divRef()
-    if (div)
-      set(e => {
-        const left = max(floor(div.scrollLeft), 0)
-        const top = max(floor(div.scrollTop), 0)
-        const clientWidth = min(floor(div.clientWidth), screenWidth())
-        const clientHeight = min(floor(div.clientHeight), screenHeight())
-        return top !== e.top ||
-          left !== e.left ||
-          clientHeight !== e.clientHeight ||
-          clientWidth !== e.clientWidth ||
-          false !== e.topDirection ||
-          false !== e.leftDirection
-          ? {
-              top,
-              left,
-              clientHeight,
-              clientWidth,
-              topDirection: getDirection(top, e.top),
-              leftDirection: getDirection(left, e.left),
-            }
-          : e
-      })
+    if (div) set(e => updateScroll(e, div))
   }
   const subscribe = (): Unsubscribe => {
     const cleans: (() => void)[] = []
