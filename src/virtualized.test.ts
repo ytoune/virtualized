@@ -8,7 +8,7 @@ type AreaString = `${number}/${number}/${number}/${number}`
 type LineString = `${number},${number},${Bin},${Bin}-${AreaString}`
 
 describe('virtualized', () => {
-  it('ok', () => {
+  it('ok', async () => {
     let div = null as HTMLElement | null
     div = null
     let calledProp: ScrollProps[] = []
@@ -26,11 +26,12 @@ describe('virtualized', () => {
       rowSizes: { size: 4, length: 25 }, // total 100
       colSizes: { size: 6, length: 1 }, // total 6
     })
-    const pushDiv = (d: HTMLElement, p: ScrollProps | null) => {
+    const pushDiv = async (d: HTMLElement, p: ScrollProps | null) => {
       div = d
       calledProp = []
       pinned = 0
       v.onScroll()
+      await new Promise<void>(r => setTimeout(r, 1))
       expect(calledProp).toEqual(null !== p ? [p] : [])
       expect(pinned).toBe(1)
     }
@@ -38,7 +39,7 @@ describe('virtualized', () => {
       (area: (row: number, col: number) => AreaString) =>
       (ir: number, ic: number, sr?: true, sc?: true): LineString =>
         `${ir},${ic},${sr ? 1 : 0},${sc ? 1 : 0}-${area(ir, ic)}`
-    pushDiv(
+    await pushDiv(
       {
         scrollTop: 0,
         scrollLeft: 0,
@@ -59,9 +60,7 @@ describe('virtualized', () => {
       height: '50px',
       width: '6px',
       display: 'grid',
-      gridTemplateRows: '0px repeat(4, 4px)',
-      gridTemplateColumns: '0px repeat(1, 6px)',
-      gridTemplateAreas: 'none',
+      gridTemplate: '0px repeat(5, 4px)/0px repeat(1, 6px)',
     })
     let list = r.items(renderItem(r.getGridArea))
     expect(list).toEqual([
@@ -69,9 +68,10 @@ describe('virtualized', () => {
       '1,0,0,0-3/2/4/3',
       '2,0,0,0-4/2/5/3',
       '3,0,0,0-5/2/6/3',
+      '4,0,0,0-6/2/7/3',
     ])
 
-    pushDiv(
+    await pushDiv(
       {
         scrollTop: 10,
         scrollLeft: 0,
@@ -85,22 +85,21 @@ describe('virtualized', () => {
       height: '50px',
       width: '6px',
       display: 'grid',
-      gridTemplateRows: '4px repeat(7, 4px)',
-      gridTemplateColumns: '0px repeat(1, 6px)',
-      gridTemplateAreas: 'none',
+      gridTemplate: '0px repeat(8, 4px)/0px repeat(1, 6px)',
     })
     list = r.items(renderItem(r.getGridArea))
     expect(list).toEqual([
-      '1,0,0,0-2/2/3/3',
-      '2,0,0,0-3/2/4/3',
-      '3,0,0,0-4/2/5/3',
-      '4,0,0,0-5/2/6/3',
-      '5,0,0,0-6/2/7/3',
-      '6,0,0,0-7/2/8/3',
-      '7,0,0,0-8/2/9/3',
+      '0,0,0,0-2/2/3/3',
+      '1,0,0,0-3/2/4/3',
+      '2,0,0,0-4/2/5/3',
+      '3,0,0,0-5/2/6/3',
+      '4,0,0,0-6/2/7/3',
+      '5,0,0,0-7/2/8/3',
+      '6,0,0,0-8/2/9/3',
+      '7,0,0,0-9/2/10/3',
     ])
 
-    pushDiv(
+    await pushDiv(
       {
         scrollTop: 41,
         scrollLeft: 0,
@@ -114,19 +113,19 @@ describe('virtualized', () => {
       height: '50px',
       width: '6px',
       display: 'grid',
-      gridTemplateRows: '36px repeat(7, 4px)',
-      gridTemplateColumns: '0px repeat(1, 6px)',
-      gridTemplateAreas: 'none',
+      gridTemplate: '8px repeat(9, 4px)/0px repeat(1, 6px)',
     })
     list = r.items(renderItem(r.getGridArea))
     expect(list).toEqual([
-      '9,0,0,0-2/2/3/3',
-      '10,0,0,0-3/2/4/3',
-      '11,0,0,0-4/2/5/3',
-      '12,0,0,0-5/2/6/3',
-      '13,0,0,0-6/2/7/3',
-      '14,0,0,0-7/2/8/3',
-      '15,0,0,0-8/2/9/3',
+      '7,0,0,0-2/2/3/3',
+      '8,0,0,0-3/2/4/3',
+      '9,0,0,0-4/2/5/3',
+      '10,0,0,0-5/2/6/3',
+      '11,0,0,0-6/2/7/3',
+      '12,0,0,0-7/2/8/3',
+      '13,0,0,0-8/2/9/3',
+      '14,0,0,0-9/2/10/3',
+      '15,0,0,0-10/2/11/3',
     ])
   })
 })

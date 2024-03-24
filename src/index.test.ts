@@ -25,9 +25,10 @@ it('main', () => {
       width: '24px',
       height: '20px',
       display: 'grid',
-      gridTemplateRows: 'repeat(5, 4px)',
-      gridTemplateColumns: 'repeat(3, 8px)',
-      gridTemplateAreas: 'none',
+      gridTemplate: 'repeat(5, 4px)/repeat(3, 8px)',
+      // gridTemplateRows: 'repeat(5, 4px)',
+      // gridTemplateColumns: 'repeat(3, 8px)',
+      // gridTemplateAreas: 'none',
     },
     outerStyle: {
       width: '100%',
