@@ -1,36 +1,46 @@
-import { getIndex } from './get-range'
 import type {
   AreaString,
   HTMLElement,
   RenderItem,
+  ScrollContainer,
+  ScrollState,
   Sizes,
   Sticky,
 } from './interfaces'
-import { isArray } from './utils'
-import { getNextOffset } from './next-offset'
-import type { Scroll } from './with-scroll'
-import { getInitted, subscribeImpl, updateScroll } from './with-scroll'
-import { createItemStyle, getTotal, outerStyle } from './format'
+import { isArray, screenHeight, screenWidth } from './utils'
+import { subscribeImpl } from './with-scroll'
+import { createItemStyle, outerStyle } from './format'
 import { createIterImpl } from './items'
-
-const { min, max, abs } = Math
+import { createVirtualizedVariable } from './variable'
+import { createVirtualizedFixed } from './fixed'
 
 export interface ScrollProps {
   readonly top?: number
   readonly left?: number
 }
 
-// type Overscan = Readonly<{
-//   row?: Readonly<{ min: number; max?: number }>
-//   col?: Readonly<{ min: number; max?: number }>
-// }>
+type CreateManagerProps = Readonly<{
+  ref: () => ScrollContainer | null
+  sizes: Sizes
+  initState: () => ScrollState
+  defaultPageSize: () => number
+}>
+const createManager = (
+  props: CreateManagerProps,
+):
+  | ReturnType<typeof createVirtualizedVariable>
+  | ReturnType<typeof createVirtualizedFixed> =>
+  (isArray(props.sizes) ? createVirtualizedVariable : createVirtualizedFixed)(
+    props as Parameters<typeof createVirtualizedVariable>[0] &
+      Parameters<typeof createVirtualizedFixed>[0],
+  )
+
 export type VirtualizedProps = Readonly<{
   pin: () => void
   divRef: () => HTMLElement | null
   scroll: (props: ScrollProps) => void
   rowSizes: Sizes
   colSizes: Sizes
-  // overscan?: Overscan
 }>
 export const createVirtualized = ({
   pin,
@@ -39,62 +49,53 @@ export const createVirtualized = ({
   rowSizes,
   colSizes,
 }: VirtualizedProps) => {
-  let virtualScroll: Scroll = getInitted()
-  let realScroll: Scroll = virtualScroll
-  const rowOffsetManager = createOffsetManager(
-    rowSizes,
-    realScroll.top,
-    realScroll.clientHeight,
-  )
-  const colOffsetManager = createOffsetManager(
-    colSizes,
-    realScroll.left,
-    realScroll.clientWidth,
-  )
+  const rowManager = createManager({
+    ref: () => {
+      const div = divRef()
+      return div && { offset: div.scrollTop, pageSize: div.clientHeight }
+    },
+    sizes: rowSizes,
+    initState: () =>
+      ({ offset: 0, pageSize: screenHeight(), direction: false }) as const,
+    defaultPageSize: screenHeight,
+  })
+  const colManager = createManager({
+    ref: () => {
+      const div = divRef()
+      return div && { offset: div.scrollLeft, pageSize: div.clientWidth }
+    },
+    sizes: colSizes,
+    initState: () =>
+      ({ offset: 0, pageSize: screenWidth(), direction: false }) as const,
+    defaultPageSize: screenWidth,
+  })
   let scrolling = false
-  let lastScrollTop = null as null | number
-  let lastScrollLeft = null as null | number
   const onScroll = () => {
     const div = divRef()
     if (!div || scrolling) return
-    const prev = realScroll
-    realScroll = updateScroll(realScroll, div)
-    if (prev === realScroll) return
-    const r2 = rowOffsetManager.f(realScroll.top, realScroll.clientHeight)
-    const c2 = colOffsetManager.f(realScroll.left, realScroll.clientWidth)
-    virtualScroll = {
-      top: r2.vo,
-      left: c2.vo,
-      clientHeight: realScroll.clientHeight,
-      clientWidth: realScroll.clientWidth,
-      topDirection: realScroll.topDirection,
-      leftDirection: realScroll.leftDirection,
+    const r2 = rowManager.recalc()
+    const c2 = colManager.recalc()
+    if (false !== r2 || false !== c2) {
+      scrolling = true
+      const scrollProps: { top?: number; left?: number } = {}
+      if ('number' === typeof r2) scrollProps.top = r2
+      if ('number' === typeof c2) scrollProps.left = c2
+      pin()
+      if (scrollProps.top || scrollProps.left) scroll(scrollProps)
+      Promise.resolve().then(() => (scrolling = false))
     }
-    scrolling = true
-    const scrollProps: { top?: number; left?: number } = {}
-    if (r2.d && lastScrollTop !== r2.ro) lastScrollTop = scrollProps.top = r2.ro
-    if (c2.d && lastScrollLeft !== c2.ro)
-      lastScrollLeft = scrollProps.left = c2.ro
-    pin()
-    if (scrollProps.top || scrollProps.left) scroll(scrollProps)
-    Promise.resolve().then(() => (scrolling = false))
   }
   const render = (sticky?: Sticky) => {
-    const [rowRange, height, preRow] = rowOffsetManager.r()
-    const [colRange, width, preCol] = colOffsetManager.r()
-    const gridTemplateRows = getTemplate(preRow, rowSizes, ...rowRange)
-    const gridTemplateColumns = getTemplate(preCol, colSizes, ...colRange)
+    const r2 = rowManager.render()
+    const c2 = colManager.render()
     const innerStyle = {
-      height: `${height}px`,
-      width: `${width}px`,
+      height: `${r2.innerSize}px`,
+      width: `${c2.innerSize}px`,
       display: 'grid',
-      // gridTemplateRows,
-      // gridTemplateColumns,
-      // gridTemplateAreas: 'none',
-      gridTemplate: `${gridTemplateRows}/${gridTemplateColumns}`,
+      gridTemplate: `${r2.gridTemplate}/${c2.gridTemplate}`,
     } as const
-    const rowIter = createIterImpl(rowRange, sticky?.r)
-    const colIter = createIterImpl(colRange, sticky?.c)
+    const rowIter = createIterImpl(r2.range, sticky?.r)
+    const colIter = createIterImpl(c2.range, sticky?.c)
     const items = <T>(renderItem: RenderItem<T>) => {
       const items: T[] = []
       if (rowSizes.length && colSizes.length) {
@@ -108,7 +109,7 @@ export const createVirtualized = ({
       return items
     }
     const getGridArea = (row: number, col: number): AreaString =>
-      `${2 + row - rowRange[0]}/${2 + col - colRange[0]}/${3 + row - rowRange[0]}/${3 + col - colRange[0]}`
+      `${row + r2.gridConst}/${col + c2.gridConst}/${1 + row + r2.gridConst}/${1 + col + c2.gridConst}`
     const itemStyle = (row: number, col: number) =>
       createItemStyle(row, col, { rowSizes, colSizes, sticky, getGridArea })
     return {
@@ -117,86 +118,10 @@ export const createVirtualized = ({
       items,
       itemStyle,
       getGridArea,
-      rowRange,
-      colRange,
+      rowRange: r2.range,
+      colRange: c2.range,
     } as const
   }
   const subscribe = () => subscribeImpl(divRef, onScroll)
   return { render, onScroll, subscribe } as const
-}
-
-/** @internal */
-const createOffsetManager = (
-  sizes: Sizes,
-  initVirtualOffset: number,
-  initClientSize: number,
-) => {
-  const virtualTotalSize = getTotal(sizes)
-  let vo = initVirtualOffset
-  let ro = null as null | number
-  let ps = null as null | number
-  let range: readonly [start: number, end: number] = [0, 0]
-  let ro2 = null as null | number
-  const f = (realOffset: number, clientSize: number) => {
-    if (null !== ro2 && abs(ro2 - realOffset) <= 2 && ps === clientSize)
-      return { vo, ro, d: false } as const
-    const o = getNextOffset(
-      virtualTotalSize,
-      clientSize,
-      ps ?? clientSize,
-      realOffset,
-      ro ?? realOffset,
-      vo,
-    )
-    ps = clientSize
-    range = getRange(sizes, o[1], vo, ps)
-    ;[ro, vo] = o
-    const d = 2 < abs(ro - realOffset)
-    ro2 = realOffset
-    return { vo, ro, d } as const
-  }
-  const r = () =>
-    [
-      range,
-      min((ps ?? initClientSize) * 5, virtualTotalSize),
-      vo - (ro ?? vo),
-    ] as const
-  return { f, r } as const
-}
-
-/** @internal */
-const getRange = (
-  sizes: Sizes,
-  current: number,
-  prev: number,
-  clientSize: number,
-): readonly [start: number, end: number] => {
-  const startOffset = current - clientSize
-  const endOffset = current + clientSize + clientSize
-
-  const startIndex = getIndex(sizes, startOffset)
-  const endIndex = getIndex(sizes, endOffset, true)
-
-  return [startIndex, endIndex] as const
-}
-
-/** @internal */
-const sumLimit = (sizes: Sizes, idx: number): number => {
-  if (isArray(sizes)) {
-    let sum = 0
-    for (let i = 0; i < idx && i < sizes.length; ++i) sum += sizes[i]!
-    return sum
-  }
-  return sizes.size * min(max(0, idx), sizes.length)
-}
-
-/** @internal */
-const getTemplate = (pre: number, sizes: Sizes, start: number, end: number) => {
-  const p = sumLimit(sizes, start) - pre || 0
-  if (isArray(sizes))
-    return `${p}px ${sizes
-      .slice(start, end)
-      .map(s => `${s}px`)
-      .join(' ')}`
-  return `${p}px repeat(${end - start}, ${sizes.size}px)`
 }
