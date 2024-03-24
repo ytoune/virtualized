@@ -1,9 +1,10 @@
 export type StickyPosition = number | readonly number[] | ReadonlySet<number>
 export type Sticky = Readonly<{ r?: StickyPosition; c?: StickyPosition }> | null
 
-export type Sizes =
-  | Readonly<{ size: number; length: number }>
-  | readonly number[]
+export type FixedSizes = Readonly<{ size: number; length: number }>
+export type VariableSizes = readonly number[]
+
+export type Sizes = FixedSizes | VariableSizes
 
 export type AreaString = `${number}/${number}/${number}/${number}`
 

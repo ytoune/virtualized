@@ -79,20 +79,20 @@ export const withScroll = ({ divRef, set }: ScrollProps) => {
 /** @internal */
 export const subscribeImpl = (
   divRef: () => HTMLElement | null,
-  onScroll: () => void,
+  onScrollOrResize: () => void,
 ): Unsubscribe => {
   const cleans: (() => void)[] = []
   try {
-    onScroll()
-    window.addEventListener('resize', onScroll, { passive: true })
-    cleans.push(() => window.removeEventListener('resize', onScroll))
-    const observer = new ResizeObserver(onScroll)
+    onScrollOrResize()
+    window.addEventListener('resize', onScrollOrResize, { passive: true })
+    cleans.push(() => window.removeEventListener('resize', onScrollOrResize))
+    const observer = new ResizeObserver(onScrollOrResize)
     cleans.push(() => observer.disconnect())
     const div = divRef()
     if (div instanceof Element) {
       observer.observe(div)
-      div.addEventListener('scroll', onScroll, { passive: true })
-      cleans.push(() => div.removeEventListener('scroll', onScroll))
+      div.addEventListener('scroll', onScrollOrResize, { passive: true })
+      cleans.push(() => div.removeEventListener('scroll', onScrollOrResize))
     }
   } catch {
     // pass
