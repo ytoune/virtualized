@@ -75,12 +75,12 @@ export const withScroll = ({ divRef, set }: ScrollProps) => {
     const div = divRef()
     if (div) set(e => updateScroll(e, div))
   }
-  const subscribe = (): Unsubscribe => subscribeImpl(divRef, onScroll)
+  const subscribe = (): Unsubscribe => subscribeScroll(divRef, onScroll)
   return { init, onScroll, subscribe } as const
 }
 
 /** @internal */
-export const subscribeImpl = (
+export const subscribeScroll = (
   divRef: () => HTMLElement | null,
   onScrollOrResize: () => void,
 ): Unsubscribe => {

@@ -8,7 +8,7 @@ import type {
   Sticky,
 } from './interfaces'
 import { isArray, screenHeight, screenWidth } from './utils'
-import { subscribeImpl } from './with-scroll'
+import { subscribeScroll } from './with-scroll'
 import { createItemStyle, outerStyle } from './format'
 import { createIterImpl } from './items'
 import { createVirtualizedVariable } from './variable'
@@ -122,6 +122,6 @@ export const createVirtualized = ({
       colRange: c2.range,
     } as const
   }
-  const subscribe = () => subscribeImpl(divRef, onScroll)
+  const subscribe = () => subscribeScroll(divRef, onScroll)
   return { render, onScroll, subscribe } as const
 }
