@@ -22,12 +22,16 @@ export type RenderItem<T> = (
   isStickyCol: true | undefined,
 ) => T | null
 
-// export type Scroll = Readonly<{
-//   realOffset: number
-//   virtualOffset: number
-//   clientSize: number
-//   totalSize: number
-// }>
+export interface ScrollContainer {
+  readonly offset: number
+  readonly pageSize: number
+}
+
+export type ScrollState = Readonly<{
+  offset: number
+  pageSize: number
+  direction: false | 'backward' | 'forward'
+}>
 
 export interface HTMLElement {
   readonly scrollLeft: number

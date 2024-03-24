@@ -28,3 +28,21 @@ export const getDirection = (
   prev: number,
 ): false | 'backward' | 'forward' =>
   prev < next ? 'forward' : prev > next ? 'backward' : false
+
+/** @internal */
+export const screenHeight = (): number => {
+  try {
+    return window.screen.height
+  } catch {
+    return 1 / 0
+  }
+}
+
+/** @internal */
+export const screenWidth = (): number => {
+  try {
+    return window.screen.width
+  } catch {
+    return 1 / 0
+  }
+}

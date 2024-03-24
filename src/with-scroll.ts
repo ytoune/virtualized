@@ -1,24 +1,9 @@
-import type { HTMLElement } from './interfaces'
-import { getDirection } from './utils'
+import type { HTMLElement, ScrollContainer, ScrollState } from './interfaces'
+import { screenHeight, screenWidth, getDirection } from './utils'
 
 const { floor, min, max } = Math
 
 type Unsubscribe = () => void
-
-const screenHeight = (): number => {
-  try {
-    return window.screen.height
-  } catch {
-    return 1 / 0
-  }
-}
-const screenWidth = (): number => {
-  try {
-    return window.screen.width
-  } catch {
-    return 1 / 0
-  }
-}
 
 /** @internal */
 export const getInitted = () =>
@@ -30,6 +15,24 @@ export const getInitted = () =>
     topDirection: false,
     leftDirection: false,
   }) as const satisfies Scroll
+
+/** @internal */
+export const updateState = (
+  prevState: ScrollState,
+  div: ScrollContainer,
+  defaultPageSize: () => number,
+): ScrollState => {
+  const offset = max(floor(div.offset), 0)
+  const pageSize = min(floor(div.pageSize), defaultPageSize())
+  // false !== prevState.direction ||
+  return offset !== prevState.offset || pageSize !== prevState.pageSize
+    ? {
+        offset,
+        pageSize,
+        direction: getDirection(offset, prevState.offset),
+      }
+    : prevState
+}
 
 /** @internal */
 export const updateScroll = (prevScroll: Scroll, div: HTMLElement): Scroll => {
