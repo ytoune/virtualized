@@ -33,14 +33,13 @@ export const createIterImpl = (
 
 export const createIdxIter = (
   sizes: Sizes,
-  innerSize: number,
   scrollOffset: number,
-  scrollDirection: boolean | 'backward' | 'forward',
+  innerSize: number,
   stickyPosition: StickyPosition | undefined,
-  overscanSize?: number,
+  overscanSize: number = innerSize,
 ) =>
   createIterImpl(
-    getRange(sizes, innerSize, scrollOffset, scrollDirection, overscanSize),
+    getRange(sizes, scrollOffset, innerSize, overscanSize),
     stickyPosition,
   )
 
@@ -53,25 +52,20 @@ export const createItems = <T>(
   { colSizes, rowSizes, sticky }: Format,
   scroll: Scroll,
   renderItem: RenderItem<T>,
-  overscanSize?: number,
 ): T[] => {
   const items: T[] = []
   if (rowSizes.length && colSizes.length) {
     const rowIter = createIdxIter(
       rowSizes,
-      scroll.clientHeight,
-      scroll.top,
-      scroll.topDirection,
+      scroll.top.offset,
+      scroll.top.pageSize,
       sticky?.r,
-      overscanSize,
     )
     const colIter = createIdxIter(
       colSizes,
-      scroll.clientWidth,
-      scroll.left,
-      scroll.leftDirection,
+      scroll.left.offset,
+      scroll.left.pageSize,
       sticky?.c,
-      overscanSize,
     )
     rowIter((r, q) => {
       colIter((c, p) => {

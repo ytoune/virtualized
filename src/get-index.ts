@@ -31,29 +31,16 @@ export const getIndex = (s: Sizes, offset: number, end = false): number => {
 
 export const getRange = (
   sizes: Sizes,
-  innerSize: number,
-  scrollOffset: number,
-  scrollDirection: boolean | 'backward' | 'forward',
+  offset: number,
+  pageSize: number,
   overscanSize = 20,
-): readonly [number, number] => {
-  const count = sizes.length
+): readonly [start: number, end: number] => {
+  if (0 === sizes.length) return [0, 0]
 
-  if (0 === count) return [0, 0]
-
-  const overscanBackward =
-    true === scrollDirection || 'backward' === scrollDirection
-      ? max(0, overscanSize)
-      : 0
-  const overscanForward =
-    true === scrollDirection || 'forward' === scrollDirection
-      ? max(0, overscanSize)
-      : 0
-
-  const startOffset = scrollOffset - overscanBackward
-  const endOffset = innerSize + scrollOffset + overscanForward
+  const startOffset = offset - overscanSize
+  const endOffset = offset + pageSize + overscanSize
   const startIndex = getIndex(sizes, startOffset)
   const endIndex = getIndex(sizes, endOffset, true)
 
   return [startIndex, endIndex]
-  // return [max(0, min(count - 1, startIndex)), max(0, min(count, endIndex))]
 }

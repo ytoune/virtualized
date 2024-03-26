@@ -30,7 +30,6 @@ export interface ScrollContainer {
 export type ScrollState = Readonly<{
   offset: number
   pageSize: number
-  direction: false | 'backward' | 'forward'
 }>
 
 export interface HTMLElement {

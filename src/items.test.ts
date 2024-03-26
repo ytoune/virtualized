@@ -18,14 +18,6 @@ const item = ((r: number, c: number, rs?: true, cs?: true) =>
 
 describe('createItems', () => {
   const e = (o: unknown) => JSON.stringify(o).replace(/"/giu, '')
-  const scroll = {
-    top: 0,
-    left: 0,
-    clientHeight: 15,
-    clientWidth: 10,
-    topDirection: false,
-    leftDirection: false,
-  } as const
   const list: {
     title: string
     args: Parameters<typeof createItems<string>>
@@ -34,14 +26,21 @@ describe('createItems', () => {
     {
       title: 'ok',
       args: [
-        {
-          rowSizes: { size: 4, length: 15 },
-          colSizes: { size: 8, length: 5 },
-        },
-        { ...scroll, top: 0, left: 0, clientHeight: 5, clientWidth: 10 },
+        { rowSizes: { size: 4, length: 15 }, colSizes: { size: 8, length: 5 } },
+        { top: { offset: 0, pageSize: 5 }, left: { offset: 0, pageSize: 10 } },
         item,
       ],
-      ret: [item(0, 0), item(0, 1), item(1, 0), item(1, 1)],
+      ret: [
+        item(0, 0),
+        item(0, 1),
+        item(0, 2),
+        item(1, 0),
+        item(1, 1),
+        item(1, 2),
+        item(2, 0),
+        item(2, 1),
+        item(2, 2),
+      ],
     },
   ]
   for (const { title, args, ret } of list) {
@@ -54,56 +53,55 @@ describe('createItems', () => {
     sizes: Sizes
     offset: number
     clientSize: number
-    direction?: false | 'backward' | 'forward'
     ret: [start: number, end: number]
   }[] = [
     {
       sizes: { size: 4, length: 15 },
       offset: 0,
       clientSize: 4,
-      ret: [0, 0],
-    },
-    {
-      sizes: { size: 4, length: 15 },
-      offset: 0,
-      clientSize: 5,
-      ret: [0, 1],
-    },
-    {
-      sizes: { size: 4, length: 15 },
-      offset: 0,
-      clientSize: 9,
       ret: [0, 2],
     },
     {
       sizes: { size: 4, length: 15 },
       offset: 0,
-      clientSize: 60,
-      ret: [0, 14],
+      clientSize: 5,
+      ret: [0, 3],
     },
     {
       sizes: { size: 4, length: 15 },
       offset: 0,
-      clientSize: 4,
-      ret: [0, 0],
+      clientSize: 9,
+      ret: [0, 5],
+    },
+    {
+      sizes: { size: 4, length: 15 },
+      offset: 0,
+      clientSize: 60,
+      ret: [0, 15],
     },
     {
       sizes: { size: 4, length: 15 },
       offset: 1,
       clientSize: 4,
-      ret: [0, 1],
+      ret: [0, 3],
     },
     {
       sizes: { size: 4, length: 15 },
       offset: 10,
       clientSize: 5,
-      ret: [2, 3],
+      ret: [1, 5],
     },
     {
       sizes: { size: 4, length: 15 },
       offset: 10,
       clientSize: 50,
-      ret: [2, 14],
+      ret: [0, 15],
+    },
+    {
+      sizes: { size: 4, length: 15 },
+      offset: 10,
+      clientSize: 10,
+      ret: [0, 8],
     },
   ]
   for (const {
@@ -111,22 +109,17 @@ describe('createItems', () => {
     sizes,
     offset,
     clientSize,
-    direction = false,
     ret: [start, end],
   } of list2) {
     it(`${title ? `${title}: ` : ''}${e({ sizes, offset, clientSize })}`, () => {
       const ret: string[] = []
-      for (let i = start; i <= end; ++i) ret.push(item(i, 0))
+      for (let i = start; i < end; ++i) ret.push(item(i, 0))
       expect(
         createItems(
           { rowSizes: sizes, colSizes: { size: 24, length: 1 } },
           {
-            top: offset,
-            left: 0,
-            clientHeight: clientSize,
-            clientWidth: 24,
-            topDirection: direction,
-            leftDirection: false,
+            top: { offset, pageSize: clientSize },
+            left: { offset: 0, pageSize: 24 },
           },
           item,
         ),

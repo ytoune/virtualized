@@ -22,12 +22,12 @@ export const binarySearch = (
   return ok
 }
 
-/** @internal */
-export const getDirection = (
-  next: number,
-  prev: number,
-): false | 'backward' | 'forward' =>
-  prev < next ? 'forward' : prev > next ? 'backward' : false
+// /** @internal */
+// export const getDirection = (
+//   next: number,
+//   prev: number,
+// ): false | 'backward' | 'forward' =>
+//   prev < next ? 'forward' : prev > next ? 'backward' : false
 
 /** @internal */
 export const screenHeight = (): number => {

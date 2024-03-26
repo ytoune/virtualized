@@ -1,5 +1,5 @@
 import type { HTMLElement, ScrollContainer, ScrollState } from './interfaces'
-import { screenHeight, screenWidth, getDirection } from './utils'
+import { screenHeight, screenWidth } from './utils'
 
 const { floor, min, max } = Math
 
@@ -8,12 +8,8 @@ type Unsubscribe = () => void
 /** @internal */
 export const getInitted = () =>
   ({
-    top: 0,
-    left: 0,
-    clientHeight: screenHeight(),
-    clientWidth: screenWidth(),
-    topDirection: false,
-    leftDirection: false,
+    top: { offset: 0, pageSize: screenHeight() },
+    left: { offset: 0, pageSize: screenWidth() },
   }) as const satisfies Scroll
 
 /** @internal */
@@ -24,36 +20,25 @@ export const updateState = (
 ): ScrollState => {
   const offset = max(floor(div.offset), 0)
   const pageSize = min(floor(div.pageSize), defaultPageSize())
-  // false !== prevState.direction ||
   return offset !== prevState.offset || pageSize !== prevState.pageSize
-    ? {
-        offset,
-        pageSize,
-        direction: getDirection(offset, prevState.offset),
-      }
+    ? { offset, pageSize }
     : prevState
 }
 
 /** @internal */
 export const updateScroll = (prevScroll: Scroll, div: HTMLElement): Scroll => {
-  const left = max(floor(div.scrollLeft), 0)
-  const top = max(floor(div.scrollTop), 0)
-  const clientWidth = min(floor(div.clientWidth), screenWidth())
-  const clientHeight = min(floor(div.clientHeight), screenHeight())
-  // false !== prevScroll.topDirection ||
-  // false !== prevScroll.leftDirection ||
-  return top !== prevScroll.top ||
-    left !== prevScroll.left ||
-    clientHeight !== prevScroll.clientHeight ||
-    clientWidth !== prevScroll.clientWidth
-    ? {
-        top,
-        left,
-        clientHeight,
-        clientWidth,
-        topDirection: getDirection(top, prevScroll.top),
-        leftDirection: getDirection(left, prevScroll.left),
-      }
+  const top = updateState(
+    prevScroll.top,
+    { offset: div.scrollTop, pageSize: div.clientHeight },
+    screenHeight,
+  )
+  const left = updateState(
+    prevScroll.left,
+    { offset: div.scrollLeft, pageSize: div.clientWidth },
+    screenWidth,
+  )
+  return top !== prevScroll.top || left !== prevScroll.left
+    ? { top, left }
     : prevScroll
 }
 
@@ -61,14 +46,7 @@ type ScrollProps = Readonly<{
   divRef: () => HTMLElement | null
   set: (f: (scroll: Scroll) => Scroll) => void
 }>
-export type Scroll = Readonly<{
-  top: number
-  left: number
-  clientHeight: number
-  clientWidth: number
-  topDirection: false | 'backward' | 'forward'
-  leftDirection: false | 'backward' | 'forward'
-}>
+export type Scroll = Readonly<{ top: ScrollState; left: ScrollState }>
 export const withScroll = ({ divRef, set }: ScrollProps) => {
   const init = getInitted()
   const onScroll = () => {
