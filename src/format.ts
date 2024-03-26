@@ -24,9 +24,6 @@ const lift = (
   }
 }
 
-const getGridAreaImpl = (row: number, col: number): AreaString =>
-  `${row + 1}/${col + 1}/${row + 2}/${col + 2}`
-
 type LiftMemoTuple = readonly [
   Sizes,
   StickyPosition | undefined,
@@ -49,6 +46,9 @@ const memoizedLift = (
   return (v[2][idx] ??= { v: lift(idx, list, pos) }).v
 }
 
+const defaultGetGridArea = (row: number, col: number): AreaString =>
+  `${row + 1}/${col + 1}/${row + 2}/${col + 2}`
+
 export const createItemStyle = (
   row: number,
   col: number,
@@ -56,7 +56,7 @@ export const createItemStyle = (
     rowSizes,
     colSizes,
     sticky,
-    getGridArea = getGridAreaImpl,
+    getGridArea = defaultGetGridArea,
   }: Readonly<{
     rowSizes: Sizes
     colSizes: Sizes
@@ -78,7 +78,7 @@ export const createItemStyle = (
 }
 
 /** @internal */
-export const getTotal = (sizes: Sizes) => {
+const getTotal = (sizes: Sizes) => {
   if (isArray(sizes)) {
     let sum = 0
     for (let i = 0; i < sizes.length; ++i) sum += sizes[i]!
@@ -107,34 +107,24 @@ type InnerStyle = {
   width: `${number}px`
   height: `${number}px`
   display: 'grid'
-  // gridTemplateRows: string
-  // gridTemplateColumns: string
-  // gridTemplateAreas: 'none'
-  gridTemplate: string
+  gridTemplate: `${string}/${string}`
 }
 
-type ContainerStylesProps = Readonly<{
-  rowSizes: Sizes
-  colSizes: Sizes
-}>
-export type ContainerStyles = Readonly<{
-  innerStyle: InnerStyle
-  outerStyle: typeof outerStyle
-}>
-export const createContainerStyles = ({
+/** @deprecated */
+export const createFormat = ({
   rowSizes: rows,
   colSizes: cols,
-}: ContainerStylesProps): ContainerStyles => {
-  const height = getTotal(rows)
-  const width = getTotal(cols)
+  sticky,
+}: Readonly<{
+  rowSizes: Sizes
+  colSizes: Sizes
+  sticky?: Sticky
+}>) => {
   const innerStyle: InnerStyle = {
-    width: `${width}px`,
-    height: `${height}px`,
+    height: `${getTotal(rows)}px`,
+    width: `${getTotal(cols)}px`,
     display: 'grid',
     gridTemplate: `${getTemplate(rows)}/${getTemplate(cols)}`,
-    // gridTemplateRows: getTemplate(rows),
-    // gridTemplateColumns: getTemplate(cols),
-    // gridTemplateAreas: 'none',
   }
-  return { innerStyle, outerStyle }
+  return { rows, cols, sticky, innerStyle, outerStyle }
 }

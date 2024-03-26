@@ -1,5 +1,6 @@
 import { getRange } from './get-range'
 import type {
+  Controller,
   ScrollContainer,
   ScrollState,
   VariableSizes as Sizes,
@@ -9,16 +10,16 @@ import { updateState } from './with-scroll'
 export type VariableProps = Readonly<{
   ref: () => ScrollContainer | null
   sizes: Sizes
-  initState: () => ScrollState
+  initOffset: () => number
   defaultPageSize: () => number
 }>
 export const createVirtualizedVariable = ({
   ref,
   sizes,
-  initState,
+  initOffset,
   defaultPageSize,
-}: VariableProps) => {
-  let state: ScrollState = initState()
+}: VariableProps): Controller => {
+  let state: ScrollState = { offset: initOffset(), pageSize: defaultPageSize() }
   const recalc = (): true | false => {
     const div = ref()
     if (!div) return false
@@ -33,7 +34,7 @@ export const createVirtualizedVariable = ({
     const range = getRange(sizes, state.offset, state.pageSize)
     return { range, innerSize, gridTemplate, gridConst } as const
   }
-  return { render, recalc } as const
+  return { sizes, render, recalc } as const
 }
 
 /** @internal */

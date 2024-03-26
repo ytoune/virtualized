@@ -1,10 +1,10 @@
 import type {
+  Controller,
   ScrollContainer,
   ScrollState,
   FixedSizes as Sizes,
 } from './interfaces'
 import { updateState } from './with-scroll'
-import { getTotal } from './format'
 import { getRange } from './get-range'
 import { getNextOffset } from './next-offset'
 
@@ -13,16 +13,16 @@ const { min, max, abs } = Math
 export type FixedProps = Readonly<{
   ref: () => ScrollContainer | null
   sizes: Sizes
-  initState: () => ScrollState
+  initOffset: () => number
   defaultPageSize: () => number
 }>
 export const createVirtualizedFixed = ({
   ref,
   sizes,
-  initState,
+  initOffset,
   defaultPageSize,
-}: FixedProps) => {
-  let state: ScrollState = initState()
+}: FixedProps): Controller => {
+  let state: ScrollState = { offset: initOffset(), pageSize: defaultPageSize() }
   const virtualTotalSize = getTotal(sizes)
   let ro2 = null as null | number
   let vo = state.offset
@@ -61,7 +61,13 @@ export const createVirtualizedFixed = ({
     const gridConst = 2 - range[0]
     return { range, innerSize, gridTemplate, gridConst } as const
   }
-  return { render, recalc } as const
+  return { sizes, render, recalc } as const
+}
+
+/** @internal */
+const getTotal = (sizes: Sizes) => {
+  const { length: count, size } = sizes
+  return count * size
 }
 
 /** @internal */

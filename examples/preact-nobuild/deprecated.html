@@ -28,8 +28,7 @@
     const { render } = htmPreact
     const { useRef, useState, useEffect, useMemo } = htmPreact
     const { html } = htmPreact
-    const { withScroll, createContainerStyles, createItems, createItemStyle } =
-      virtualized
+    const { withScroll, createFormat, createItems } = virtualized
     const emptyArray = []
 
     const Grid = ({ colSizes, rowSizes, renderItem, sticky }) => {
@@ -39,12 +38,12 @@
       const [scroll, setScroll] = useState(init)
       useEffect(subscribe, emptyArray)
       const format = useMemo(
-        () => createContainerStyles({ colSizes, rowSizes }),
+        () => createFormat({ colSizes, rowSizes, sticky }),
         [colSizes, rowSizes],
       )
       const items = useMemo(
-        () => createItems({ colSizes, rowSizes, sticky }, scroll, renderItem),
-        [colSizes, rowSizes, sticky, scroll, renderItem],
+        () => createItems(format, scroll, renderItem),
+        [format, scroll, renderItem],
       )
       console.log('scroll', { ...scroll })
       console.log('format', { ...format })
@@ -72,16 +71,13 @@
       </span>
     `
     const chars = [...'abcdefghijklmnopqrstuvwxyz']
-    const rowSizes = { size: lineHeight, length: 250_000 }
+    const rowSizes = { size: lineHeight, length: 250_001 }
     const colSizes = [120, ...Array(150).fill(80)]
     const sticky = { r: [0, 7, 14], c: 0 }
     const sizes = { rowSizes, colSizes, sticky }
-    const renderItem = (r, c) => {
+    const renderItem = (r, c, s0) => {
       const k = `${r}:${c}`
-      const s = {
-        ...createItemStyle(r, c, sizes),
-        background: (r + c) % 2 ? '#eee' : '#fff',
-      }
+      const s = { ...s0, background: (r + c) % 2 ? '#eee' : '#fff' }
       if (s.top) s.color = 'red'
       if (s.left) s.color = 'blue'
       if (r && c) return span(chars[(r + c - 2) % chars.length], s, k)

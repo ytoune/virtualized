@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { createItems } from './items'
 import type { RenderItem, Sizes } from './interfaces'
 
-const item = ((r: number, c: number, rs?: true, cs?: true) =>
-  JSON.stringify([r, c, rs, cs])) satisfies RenderItem<string>
+const item = ((r: number, c: number) =>
+  JSON.stringify([r, c])) satisfies RenderItem<string>
 
 // const dump = (items: readonly string[]) => {
 //   const code = (s: string) => {

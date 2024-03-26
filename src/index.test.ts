@@ -5,8 +5,8 @@ import { createContainerStyles, createItems, withScroll } from './index'
 import type { RenderItem, Scroll } from './index'
 
 it('main', () => {
-  const item = ((r: number, c: number, rs?: true, cs?: true) =>
-    JSON.stringify([r, c, rs, cs])) satisfies RenderItem<string>
+  const item = ((r: number, c: number) =>
+    JSON.stringify([r, c])) satisfies RenderItem<string>
   const isItems = (u: unknown) => {
     const _throw = () => {
       throw new Error(`${JSON.stringify(u)} is not items`)
@@ -14,7 +14,7 @@ it('main', () => {
     if (!Array.isArray(u)) return _throw()
     for (const v of u) {
       if ('string' !== typeof v) return _throw()
-      if (!/^\[\d,\d,(true|null),(true|null)\]$/.test(v)) return _throw()
+      if (!/^\[\d,\d\]$/.test(v)) return _throw()
     }
   }
   const { init, onScroll } = withScroll({

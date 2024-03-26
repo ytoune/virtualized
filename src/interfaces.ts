@@ -18,8 +18,7 @@ export type CellStyle = {
 export type RenderItem<T> = (
   row: number,
   col: number,
-  isStickyRow: true | undefined,
-  isStickyCol: true | undefined,
+  style: CellStyle,
 ) => T | null
 
 export interface ScrollContainer {
@@ -38,3 +37,22 @@ export interface HTMLElement {
   readonly clientWidth: number
   readonly clientHeight: number
 }
+
+export type Controller = Readonly<{
+  sizes: Sizes
+  /**
+   * Recalculates the internal state.
+   * Returns false if there was no change in the state.
+   * If a number is returned, scrolling is required.
+   */
+  recalc: () => number | boolean
+  /**
+   * Calculates and returns the values for rendering.
+   */
+  render: () => Readonly<{
+    range: readonly [start: number, end: number]
+    innerSize: number
+    gridTemplate: string
+    gridConst: number
+  }>
+}>

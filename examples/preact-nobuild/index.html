@@ -60,16 +60,12 @@
               })
               pin()
             },
-            divRef: () => {
-              // console.log('divRef', Math.floor(outer.current?.scrollTop ?? 0))
-              return outer.current
-            },
+            divRef: () => outer.current,
             scroll: p => {
               let t = 0
               const f = () => {
                 const div = outer.current
                 if (div && ++t < 10) {
-                  // console.log({ t })
                   div.scroll(p)
                   Promise.resolve().then(() => {
                     if (
@@ -88,21 +84,8 @@
         [colSizes, rowSizes],
       )
       useEffect(v.subscribe, [v])
-      // useEffect(() => {
-      //   const r = v.render(sticky)
-      //   Object.assign(outer.current.style, r.outerStyle)
-      //   Object.assign(inner.current.style, r.innerStyle)
-      // }, [])
       const r = v.render(sticky)
-      const items = r.items(renderItem(r.itemStyle))
-      // console.log({
-      //   top: Math.floor(outer.current?.scrollTop ?? 0),
-      //   'items.length': items.length,
-      //   ...r.innerStyle,
-      //   rowRange: r.rowRange,
-      //   colRange: r.colRange,
-      // })
-      return items
+      return r.items(renderItem(r.itemStyle))
     })
     const Grid = ({ colSizes, rowSizes, renderItem, sticky }) => {
       const outer = useRef(null)
@@ -114,11 +97,6 @@
           </div>
         </div>
       `
-      // return html`
-      //   <div ref=${outer} style=${r.outerStyle}>
-      //     <div ref=${inner} style=${r.innerStyle}>${items}</div>
-      //   </div>
-      // `
     }
     const fontSize = 16
     const lineHeight = fontSize * 1.5

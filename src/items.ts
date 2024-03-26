@@ -1,3 +1,4 @@
+import { createItemStyle } from './format'
 import { getRange } from './get-range'
 import type { RenderItem, Sizes, Sticky, StickyPosition } from './interfaces'
 import { isArray } from './utils'
@@ -67,9 +68,10 @@ export const createItems = <T>(
       scroll.left.pageSize,
       sticky?.c,
     )
-    rowIter((r, q) => {
-      colIter((c, p) => {
-        const el = renderItem(r, c, q, p)
+    rowIter(r => {
+      colIter(c => {
+        const s = createItemStyle(r, c, { rowSizes, colSizes, sticky })
+        const el = renderItem(r, c, s)
         if (el) items.push(el)
       })
     })
