@@ -11,6 +11,7 @@ describe('getNextOffset', () => {
     { expectedRealOffset: 0, totalSize: 100, pageSize: 10, offset: 0 },
     { expectedRealOffset: 0, totalSize: 100, pageSize: 100, offset: 0 },
     { expectedRealOffset: 0, totalSize: 100, pageSize: 20, offset: 0 },
+    { expectedRealOffset: 0, totalSize: 10, pageSize: 10, offset: 0 },
     { expectedRealOffset: 20, totalSize: 100, pageSize: 20, offset: 20 },
     { expectedRealOffset: 80, totalSize: 100, pageSize: 20, offset: 80 },
     { expectedRealOffset: 25, totalSize: 100, pageSize: 10, offset: 45 },
