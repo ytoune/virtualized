@@ -30,6 +30,27 @@ describe('getNextOffset', () => {
       ).toEqual([expectedRealOffset, offset]),
   )
   it.each<{
+    expectedRealOffset: number
+    totalSize: number
+    pageSize: number
+    offset: number
+  }>([
+    { expectedRealOffset: 0, totalSize: 75, pageSize: 10, offset: 0 },
+    { expectedRealOffset: 5, totalSize: 75, pageSize: 10, offset: 5 },
+    { expectedRealOffset: 15, totalSize: 75, pageSize: 10, offset: 15 },
+    { expectedRealOffset: 25, totalSize: 75, pageSize: 10, offset: 25 },
+    { expectedRealOffset: 25, totalSize: 75, pageSize: 10, offset: 35 },
+    { expectedRealOffset: 25, totalSize: 75, pageSize: 10, offset: 45 },
+    { expectedRealOffset: 30, totalSize: 75, pageSize: 10, offset: 55 },
+    { expectedRealOffset: 40, totalSize: 75, pageSize: 10, offset: 65 },
+  ])(
+    '[totalSize:$totalSize,pageSize:$pageSize,offset:$offset] => [$expectedRealOffset,$offset]',
+    ({ expectedRealOffset, totalSize, pageSize, offset }) =>
+      expect(
+        getNextOffset(totalSize, pageSize, pageSize, offset, offset, offset),
+      ).toEqual([expectedRealOffset, offset]),
+  )
+  it.each<{
     ret: ReturnType<typeof getNextOffset>
     args: Parameters<typeof getNextOffset>
   }>([
