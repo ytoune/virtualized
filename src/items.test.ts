@@ -30,17 +30,7 @@ describe('createItems', () => {
         { top: { offset: 0, pageSize: 5 }, left: { offset: 0, pageSize: 10 } },
         item,
       ],
-      ret: [
-        item(0, 0),
-        item(0, 1),
-        item(0, 2),
-        item(1, 0),
-        item(1, 1),
-        item(1, 2),
-        item(2, 0),
-        item(2, 1),
-        item(2, 2),
-      ],
+      ret: [item(0, 0), item(0, 1), item(1, 0), item(1, 1)],
     },
   ]
   for (const { title, args, ret } of list) {
@@ -65,13 +55,13 @@ describe('createItems', () => {
       sizes: { size: 4, length: 15 },
       offset: 0,
       clientSize: 5,
-      ret: [0, 3],
+      ret: [0, 2],
     },
     {
       sizes: { size: 4, length: 15 },
       offset: 0,
       clientSize: 9,
-      ret: [0, 5],
+      ret: [0, 4],
     },
     {
       sizes: { size: 4, length: 15 },
@@ -83,7 +73,7 @@ describe('createItems', () => {
       sizes: { size: 4, length: 15 },
       offset: 1,
       clientSize: 4,
-      ret: [0, 3],
+      ret: [0, 2],
     },
     {
       sizes: { size: 4, length: 15 },
@@ -101,7 +91,7 @@ describe('createItems', () => {
       sizes: { size: 4, length: 15 },
       offset: 10,
       clientSize: 10,
-      ret: [0, 8],
+      ret: [1, 7],
     },
   ]
   for (const {

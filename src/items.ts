@@ -36,7 +36,7 @@ export const createIdxIter = (
   scrollOffset: number,
   innerSize: number,
   stickyPosition: StickyPosition | undefined,
-  overscanSize: number = innerSize,
+  overscanSize?: number,
 ) =>
   createIterImpl(
     getRange(sizes, scrollOffset, innerSize, overscanSize),

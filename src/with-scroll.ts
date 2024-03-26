@@ -3,10 +3,8 @@ import { screenHeight, screenWidth } from './utils'
 
 const { floor, min, max } = Math
 
-type Unsubscribe = () => void
-
 /** @internal */
-export const getInitted = () =>
+const getInitted = () =>
   ({
     top: { offset: 0, pageSize: screenHeight() },
     left: { offset: 0, pageSize: screenWidth() },
@@ -57,7 +55,8 @@ export const withScroll = ({ divRef, set }: ScrollProps) => {
   return { init, onScroll, subscribe } as const
 }
 
-/** @internal */
+type Unsubscribe = () => void
+
 export const subscribeScroll = (
   divRef: () => HTMLElement | null,
   onScrollOrResize: () => void,

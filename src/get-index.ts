@@ -33,7 +33,7 @@ export const getRange = (
   sizes: Sizes,
   offset: number,
   pageSize: number,
-  overscanSize = 20,
+  overscanSize = pageSize / 2,
 ): readonly [start: number, end: number] => {
   if (0 === sizes.length) return [0, 0]
 
