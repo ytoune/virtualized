@@ -1,4 +1,4 @@
-import { getRange } from './get-index'
+import { getRange } from './get-range'
 import type { RenderItem, Sizes, Sticky, StickyPosition } from './interfaces'
 import { isArray } from './utils'
 import type { Scroll } from './with-scroll'

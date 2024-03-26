@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 
-import { getIndex } from './get-index'
+import { getIndex } from './get-range'
 
 const isArray: (arr: unknown) => arr is readonly unknown[] = Array.isArray
 

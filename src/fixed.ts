@@ -5,7 +5,7 @@ import type {
 } from './interfaces'
 import { updateState } from './with-scroll'
 import { getTotal } from './format'
-import { getRange } from './get-index'
+import { getRange } from './get-range'
 import { getNextOffset } from './next-offset'
 
 const { min, max, abs } = Math

@@ -1,4 +1,4 @@
-import { getRange } from './get-index'
+import { getRange } from './get-range'
 import type {
   ScrollContainer,
   ScrollState,
