@@ -1,5 +1,5 @@
 import { getTotal } from './format'
-import { getIndex } from './get-range'
+import { getIndex } from './get-index'
 import type { Sizes } from './interfaces'
 import { getNextOffset } from './next-offset'
 
