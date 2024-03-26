@@ -1,6 +1,7 @@
 import { getRange } from './get-range'
 import type {
   Controller,
+  ControllerState,
   ScrollContainer,
   ScrollState,
   VariableSizes as Sizes,
@@ -20,7 +21,20 @@ export const createVirtualizedVariable = ({
   defaultPageSize,
 }: VariableProps): Controller => {
   let state: ScrollState = { offset: initOffset(), pageSize: defaultPageSize() }
-  const recalc = (): true | false => {
+  type NextState = Readonly<{ offset?: number; pageSize?: number }>
+  const recalc = (next?: NextState): true | false => {
+    if (next) {
+      if (void 0 !== next.offset) {
+        if (next.offset === state.offset) return false
+        state = { offset: next.offset, pageSize: state.pageSize }
+        return true
+      }
+      if (void 0 !== next.pageSize) {
+        if (next.pageSize === state.pageSize) return false
+        state = { offset: state.offset, pageSize: next.pageSize }
+        return true
+      }
+    }
     const div = ref()
     if (!div) return false
     const prev = state
@@ -34,7 +48,12 @@ export const createVirtualizedVariable = ({
     const range = getRange(sizes, state.offset, state.pageSize)
     return { range, innerSize, gridTemplate, gridConst } as const
   }
-  return { sizes, render, recalc } as const
+  const getState = (): ControllerState => ({
+    offset: state.offset,
+    pageSize: state.pageSize,
+    realOffset: state.offset,
+  })
+  return { sizes, render, recalc, state: getState } as const
 }
 
 /** @internal */

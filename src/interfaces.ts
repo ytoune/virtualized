@@ -38,14 +38,25 @@ export interface HTMLElement {
   readonly clientHeight: number
 }
 
+export type ControllerState = Readonly<{
+  offset: number
+  pageSize: number
+  realOffset: number
+}>
+
+export type NextState =
+  | Readonly<{ offset: number }>
+  | Readonly<{ pageSize: number }>
+
 export type Controller = Readonly<{
   sizes: Sizes
+  state: () => ControllerState
   /**
-   * Recalculates the internal state.
+   * Recalculates or set the internal state.
    * Returns false if there was no change in the state.
    * If a number is returned, scrolling is required.
    */
-  recalc: () => number | boolean
+  recalc: (state?: NextState) => number | boolean
   /**
    * Calculates and returns the values for rendering.
    */

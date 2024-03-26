@@ -1,5 +1,6 @@
 import type {
   Controller,
+  ControllerState,
   ScrollContainer,
   ScrollState,
   FixedSizes as Sizes,
@@ -26,17 +27,28 @@ export const createVirtualizedFixed = ({
   const virtualTotalSize = getTotal(sizes)
   let ro2 = null as null | number
   let vo = state.offset
-  const recalc = (): number | true | false => {
-    const div = ref()
-    if (!div) return false
+  type NextState = Readonly<{ offset?: number; pageSize?: number }>
+  const recalc = (next?: NextState): number | true | false => {
     const prev = state
-    state = updateState(state, div, defaultPageSize)
-    if (prev === state) return false
-    if (prev.pageSize === state.pageSize)
-      if (null !== ro2 && abs(ro2 - state.offset) <= 2) {
-        state = prev
-        return false
+    if (next) {
+      if (void 0 !== next.offset) {
+        if (next.offset === vo) return false
+        vo = next.offset
+      } else if (void 0 !== next.pageSize) {
+        if (next.pageSize === state.pageSize) return false
+        state = { offset: state.offset, pageSize: next.pageSize }
       }
+    } else {
+      const div = ref()
+      if (!div) return false
+      state = updateState(state, div, defaultPageSize)
+      if (prev === state) return false
+      if (prev.pageSize === state.pageSize)
+        if (null !== ro2 && abs(ro2 - state.offset) <= 2) {
+          state = prev
+          return false
+        }
+    }
     const [r0, v0] = getNextOffset(
       virtualTotalSize,
       state.pageSize,
@@ -61,7 +73,12 @@ export const createVirtualizedFixed = ({
     const gridConst = 2 - range[0]
     return { range, innerSize, gridTemplate, gridConst } as const
   }
-  return { sizes, render, recalc } as const
+  const getState = (): ControllerState => ({
+    offset: vo,
+    pageSize: state.pageSize,
+    realOffset: state.offset,
+  })
+  return { sizes, render, recalc, state: getState } as const
 }
 
 /** @internal */

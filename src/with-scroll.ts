@@ -24,7 +24,7 @@ export const updateState = (
 }
 
 /** @internal */
-export const updateScroll = (prevScroll: Scroll, div: HTMLElement): Scroll => {
+const updateScroll = (prevScroll: Scroll, div: HTMLElement): Scroll => {
   const top = updateState(
     prevScroll.top,
     { offset: div.scrollTop, pageSize: div.clientHeight },
@@ -74,8 +74,9 @@ export const subscribeScroll = (
       div.addEventListener('scroll', onScrollOrResize, { passive: true })
       cleans.push(() => div.removeEventListener('scroll', onScrollOrResize))
     }
-  } catch {
+  } catch (x) {
     // pass
+    console.error(x)
   }
   return () => {
     for (let i = 0; i < cleans.length; ++i) cleans[i]!()

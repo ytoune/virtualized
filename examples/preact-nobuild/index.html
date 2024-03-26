@@ -85,9 +85,10 @@
       )
       useEffect(v.subscribe, [v])
       const r = v.render(sticky)
-      return r.items(renderItem(r.itemStyle))
+      const items = r.items(renderItem(r))
+      return items
     })
-    const Grid = ({ colSizes, rowSizes, renderItem, sticky }) => {
+    const Grid = ({ colSizes, rowSizes }) => {
       const outer = useRef(null)
       const inner = useRef(null)
       return html`
@@ -121,10 +122,10 @@
     // const sticky = { r: [0, 7, 14], c: 0 }
     const sticky = {}
     const sizes = { rowSizes, colSizes, sticky }
-    const renderItem = itemStyle => (r, c) => {
+    const renderItem = o => (r, c) => {
       const k = `${r}:${c}`
       const s = {
-        ...itemStyle(r, c),
+        ...o.itemStyle(r, c),
         background: (r + c) % 2 ? '#eee' : '#fff',
       }
       if (s.top) s.color = 'red'
@@ -136,12 +137,7 @@
       return span(null, s, k)
     }
     const App = () => html`
-      <${Grid}
-        rowSizes=${rowSizes}
-        colSizes=${colSizes}
-        renderItem=${renderItem}
-        sticky=${sticky}
-      />
+      <${Grid} rowSizes=${rowSizes} colSizes=${colSizes} />
     `
     render(
       html`

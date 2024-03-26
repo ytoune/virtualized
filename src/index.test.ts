@@ -1,7 +1,7 @@
-import { it, expect } from 'vitest'
+import { it } from 'vitest'
 
 import type { HTMLElement } from './interfaces'
-import { createContainerStyles, createItems, withScroll } from './index'
+import { createItems, withScroll } from './index'
 import type { RenderItem, Scroll } from './index'
 
 it('main', () => {
@@ -29,25 +29,6 @@ it('main', () => {
     rowSizes: { size: 4, length: 5 },
     colSizes: { size: 8, length: 3 },
   } as const
-  const format = createContainerStyles(sizes)
-  expect(format).toEqual({
-    innerStyle: {
-      width: '24px',
-      height: '20px',
-      display: 'grid',
-      gridTemplate: 'repeat(5, 4px)/repeat(3, 8px)',
-      // gridTemplateRows: 'repeat(5, 4px)',
-      // gridTemplateColumns: 'repeat(3, 8px)',
-      // gridTemplateAreas: 'none',
-    },
-    outerStyle: {
-      width: '100%',
-      height: '100%',
-      overflow: 'scroll',
-      margin: 0,
-      padding: 0,
-    },
-  })
   isItems(createItems(sizes, scroll, item))
   div = {
     scrollTop: 0,

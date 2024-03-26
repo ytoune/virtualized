@@ -112,8 +112,8 @@ type InnerStyle = {
 
 /** @deprecated */
 export const createFormat = ({
-  rowSizes: rows,
-  colSizes: cols,
+  rowSizes,
+  colSizes,
   sticky,
 }: Readonly<{
   rowSizes: Sizes
@@ -121,10 +121,10 @@ export const createFormat = ({
   sticky?: Sticky
 }>) => {
   const innerStyle: InnerStyle = {
-    height: `${getTotal(rows)}px`,
-    width: `${getTotal(cols)}px`,
+    height: `${getTotal(rowSizes)}px`,
+    width: `${getTotal(colSizes)}px`,
     display: 'grid',
-    gridTemplate: `${getTemplate(rows)}/${getTemplate(cols)}`,
+    gridTemplate: `${getTemplate(rowSizes)}/${getTemplate(colSizes)}`,
   }
-  return { rows, cols, sticky, innerStyle, outerStyle }
+  return { rowSizes, colSizes, sticky, innerStyle, outerStyle }
 }
