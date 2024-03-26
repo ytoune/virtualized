@@ -19,21 +19,6 @@
       "require": "./dist/index.cjs",
       "import": "./dist/index.mjs",
       "types": "./dist/index.d.ts"
-    },
-    "./format": {
-      "require": "./dist/format.cjs",
-      "import": "./dist/format.mjs",
-      "types": "./dist/format.d.ts"
-    },
-    "./items": {
-      "require": "./dist/items.cjs",
-      "import": "./dist/items.mjs",
-      "types": "./dist/items.d.ts"
-    },
-    "./with-scroll": {
-      "require": "./dist/with-scroll.cjs",
-      "import": "./dist/with-scroll.mjs",
-      "types": "./dist/with-scroll.d.ts"
     }
   },
   "main": "dist/index.cjs",
