@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest'
+import { createController } from './controller'
+import type { ScrollContainer } from './interfaces'
 
-describe(() => {
-  it('hoge', () => {
-    expect('').toBe('')
-  })
+describe('createController', () => {
+  // it('hoge', () => {
+  //   expect('').toBe('')
+  // })
+
   /**
 
 pagesize=10 // ビューポートの大きさ
@@ -14,4 +17,65 @@ current が変化して origin との差が pagesize より大きくなったら
 origin に current を代入して再描画
 
    */
+
+  it('固定がない場合', () => {
+    let container = null as null | ScrollContainer
+    const ref = () => container
+    const sizes = { length: 11, size: 10 } as const
+    const sticky = null
+    const initOffset = () => 0
+    const defaultPageSize = () => 20
+    container = null
+    const controller = createController({
+      ref,
+      sizes,
+      sticky,
+      initOffset,
+      defaultPageSize,
+    })
+    expect(controller.state()).toEqual({
+      offset: 0,
+      pageSize: 20,
+      realOffset: 0,
+    })
+    // 0  1  2  3  4  5  6  7  8  9 ..
+    //      20    40    60
+    expect(controller.render()).toEqual({
+      range: [0, 6],
+      innerSize: 60,
+      gridTemplate: '0px repeat(6, 10px)',
+      gridConst: 2,
+    })
+    // 少しだけスクロールする
+    container = { offset: 15, pageSize: 20 }
+    controller.recalc()
+    expect(controller.state()).toEqual({
+      offset: 15,
+      pageSize: 20,
+      realOffset: 15,
+    })
+    // 閾値を超えるまでは描画範囲はそのまま
+    expect(controller.render()).toEqual({
+      range: [0, 6],
+      innerSize: 60,
+      gridTemplate: '0px repeat(6, 10px)',
+      gridConst: 2,
+    })
+    // スクロール量がビューポートサイズを超えた
+    container = { offset: 25, pageSize: 20 }
+    controller.recalc()
+    expect(controller.state()).toEqual({
+      offset: 25,
+      pageSize: 20,
+      realOffset: 25,
+    })
+    // 0  1  2  3  4  5  6  7  8  9 ..
+    //      20    40    60    80
+    expect(controller.render()).toEqual({
+      range: [0, 9],
+      innerSize: 85,
+      gridTemplate: '0px repeat(9, 10px)',
+      gridConst: 2,
+    })
+  })
 })
