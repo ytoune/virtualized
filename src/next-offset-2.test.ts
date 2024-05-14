@@ -18,6 +18,7 @@ describe('getOffsetAndSize', () => {
   }>([
     makeCase().title('上端').exp([0, 60], 0, 20, 110),
     makeCase().title('途中').exp([15, 75], 15, 20, 110),
+    makeCase().title('途中').exp([25, 85], 25, 20, 110),
     makeCase().title('途中').exp([40, 100], 45, 20, 110),
     makeCase().title('途中').exp([40, 95], 55, 20, 110),
     makeCase().title('下端').exp([40, 60], 90, 20, 110),
