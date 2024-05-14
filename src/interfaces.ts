@@ -45,8 +45,8 @@ export type ControllerState = Readonly<{
 }>
 
 export type NextState =
-  | Readonly<{ offset: number }>
-  | Readonly<{ pageSize: number }>
+  | Readonly<{ offset: number; pageSize?: undefined }>
+  | Readonly<{ offset?: undefined; pageSize: number }>
 
 export type Controller = Readonly<{
   sizes: Sizes
