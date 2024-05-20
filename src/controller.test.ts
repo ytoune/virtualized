@@ -142,11 +142,11 @@ origin に current を代入して再描画
     container = { offset: 70, pageSize: 20 }
     controller.recalc()
     // 0  1  2  3  4  5  6  7  8  9 10 11 ..
-    //          0    20    40    60    80
+    //    sss   0    20    40    60    80
     expect(controller.state()).toEqual({
       offset: 70,
       pageSize: 20,
-      realOffset: 40,
+      realOffset: 50, // 固定分を含めて 50px
     })
   })
 })
