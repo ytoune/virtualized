@@ -34,13 +34,18 @@ export const createController = ({
   let ps = defaultPageSize()
   let origin!: number
   let rs!: number
-  let range!: readonly [number, number]
+  let range!: [start: number, end: number, isSticky?: true][]
+  let gridTemplate!: string
   const recalcVar = () => {
     const [ro0, rs0] = getOffsetAndSize(vo, ps, virtualTotalSize)
     const [range0, outTop, outBot] = getRangeAndOut(vo, ps, sizes, sticky)
+    const [b, e] = range0
     origin = ro0 + outTop
     rs = rs0 + outTop + outBot
-    range = range0
+    const tmp: [start: number, end: number, isSticky?: true][] = []
+    for (let i = b, g = 2; i < e; ++i, ++g) tmp.push([i, g])
+    range = tmp
+    gridTemplate = getTemplate(origin, sizes, range0, sticky)
   }
   recalcVar()
   let prev = origin
@@ -77,12 +82,7 @@ export const createController = ({
       return false
     }
   }
-  const render = () => {
-    const innerSize = rs
-    const gridTemplate = getTemplate(origin, sizes, range, sticky)
-    const gridConst = 2 - range[0]
-    return { range, innerSize, gridTemplate, gridConst } as const
-  }
+  const render = () => ({ range, innerSize: rs, gridTemplate }) as const
   const getState = (): ControllerState => ({
     offset: vo,
     pageSize: ps,

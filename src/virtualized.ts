@@ -9,7 +9,6 @@ import type {
 import { isArray, screenHeight, screenWidth } from './utils'
 import { subscribeScroll } from './with-scroll'
 import { createItemStyle, outerStyle } from './format'
-import { createIterImpl } from './items'
 import { createVirtualizedVariable } from './variable'
 import { createVirtualizedFixed } from './fixed'
 
@@ -107,8 +106,6 @@ const renderImpl = (rows: Controller, cols: Controller, sticky?: Sticky) => {
     display: 'grid',
     gridTemplate: `${r2.gridTemplate}/${c2.gridTemplate}`,
   } as const
-  const rowIter = createIterImpl(r2.range, sticky?.r)
-  const colIter = createIterImpl(c2.range, sticky?.c)
   const items = <T>(
     renderItem: (
       row: number,
@@ -119,17 +116,20 @@ const renderImpl = (rows: Controller, cols: Controller, sticky?: Sticky) => {
   ) => {
     const items: T[] = []
     if (rows.sizes.length && cols.sizes.length) {
-      rowIter((r, q) => {
-        colIter((c, p) => {
-          const el = renderItem(r, c, q, p)
+      for (const ri of r2.range)
+        for (const ci of c2.range) {
+          const el = renderItem(ri[0], ci[0], ri[2], ci[2])
           if (el) items.push(el)
-        })
-      })
+        }
     }
     return items
   }
+  const gridAreaMap: Record<`${number},${number}`, AreaString> = {}
+  for (const [rk, ri] of r2.range)
+    for (const [ck, ci] of c2.range)
+      gridAreaMap[`${rk},${ck}`] = `${ri}/${ci}/${1 + ri}/${1 + ci}`
   const getGridArea = (row: number, col: number): AreaString =>
-    `${row + r2.gridConst}/${col + c2.gridConst}/${1 + row + r2.gridConst}/${1 + col + c2.gridConst}`
+    gridAreaMap[`${row},${col}`]!
   const itemStyle = (row: number, col: number) =>
     createItemStyle(row, col, {
       rowSizes: rows.sizes,

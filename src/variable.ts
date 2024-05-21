@@ -43,10 +43,11 @@ export const createVirtualizedVariable = ({
   }
   const innerSize = getTotal(sizes)
   const gridTemplate = getTemplate(sizes)
-  const gridConst = 1
   const render = () => {
-    const range = getRange(sizes, state.offset, state.pageSize)
-    return { range, innerSize, gridTemplate, gridConst } as const
+    const [s, e] = getRange(sizes, state.offset, state.pageSize)
+    const range: [b: number, e: number, s?: true][] = []
+    for (let i = s; i < e; ++i) range.push([i, 1 + i])
+    return { range, innerSize, gridTemplate } as const
   }
   const getState = (): ControllerState => ({
     offset: state.offset,

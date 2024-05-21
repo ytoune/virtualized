@@ -66,12 +66,13 @@ export const createVirtualizedFixed = ({
     return true
   }
   const render = () => {
-    const range = getRange(sizes, vo, state.pageSize)
+    const [b, e] = getRange(sizes, vo, state.pageSize)
     const innerSize = min(state.pageSize * 5, virtualTotalSize)
     const preSize = vo - state.offset
-    const gridTemplate = getTemplate(preSize, sizes, ...range)
-    const gridConst = 2 - range[0]
-    return { range, innerSize, gridTemplate, gridConst } as const
+    const gridTemplate = getTemplate(preSize, sizes, b, e)
+    const range: [b: number, e: number, s?: true][] = []
+    for (let i = b, g = 2; i < e; ++i, ++g) range.push([i, g])
+    return { range, innerSize, gridTemplate } as const
   }
   const getState = (): ControllerState => ({
     offset: vo,

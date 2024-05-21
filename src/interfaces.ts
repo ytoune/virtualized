@@ -61,9 +61,8 @@ export type Controller = Readonly<{
    * Calculates and returns the values for rendering.
    */
   render: () => Readonly<{
-    range: readonly [start: number, end: number]
+    range: readonly (readonly [start: number, end: number, isSticky?: true])[]
     innerSize: number
     gridTemplate: string
-    gridConst: number
   }>
 }>
