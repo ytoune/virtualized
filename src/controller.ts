@@ -1,3 +1,4 @@
+import { getTemplate } from './grid-template'
 import type {
   Controller,
   ControllerState,
@@ -14,6 +15,7 @@ export type CreateProps = Readonly<{
   sizes: Sizes
   sticky: StickyPosition | null
   initOffset: () => number
+  /** ウィンドウのサイズなどそのとき考え得る最大のビューポートの大きさ */
   defaultPageSize: () => number
 }>
 export const createController = ({
@@ -77,8 +79,7 @@ export const createController = ({
   }
   const render = () => {
     const innerSize = rs
-    const preSize = origin
-    const gridTemplate = getTemplate(preSize, sizes, ...range)
+    const gridTemplate = getTemplate(origin, sizes, range, sticky)
     const gridConst = 2 - range[0]
     return { range, innerSize, gridTemplate, gridConst } as const
   }
@@ -94,14 +95,4 @@ export const createController = ({
 const getTotal = (sizes: Sizes) => {
   const { length: count, size } = sizes
   return count * size
-}
-
-/** @internal */
-const sumLimit = (sizes: Sizes, idx: number): number =>
-  sizes.size * min(max(0, idx), sizes.length)
-
-/** @internal */
-const getTemplate = (pre: number, sizes: Sizes, start: number, end: number) => {
-  const p = max(0, sumLimit(sizes, start) - pre || 0)
-  return `${p}px repeat(${end - start}, ${sizes.size}px)`
 }
