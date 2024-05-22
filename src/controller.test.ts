@@ -127,6 +127,9 @@ origin に current を代入して再描画
     controller.recalc()
     // 0  1  2  3  4  5  6  7  8  9 ..
     //      20    40    60    80
+    /**
+     * @todo template をシンプルにするために発行される offset を pageSize に合わせる必要がある…
+     */
     expect(controller.state()).toEqual({
       offset: 25,
       pageSize: 20,
