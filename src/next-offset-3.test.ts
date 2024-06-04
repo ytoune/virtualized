@@ -1,8 +1,20 @@
 import { describe, it, expect } from 'vitest'
-import { getOffsetAndSize } from './next-offset-2'
+import { getOffsetAndSize } from './next-offset-3'
+import type { StickyPosition } from './interfaces'
+
+type Range = readonly [start: number, end: number]
 
 const make =
-  <R, A extends unknown[]>(_f: (...a: A) => R) =>
+  <
+    R = readonly [origin: number, innerSize: number, range: Range],
+    A extends readonly unknown[] = readonly [
+      offset: number,
+      pageSize: number,
+      totalSize: number,
+      // sizes: Sizes,
+      sticky: StickyPosition | null,
+    ],
+  >() =>
   () => ({
     title: (t: string) => ({
       exp: (ret: R, ...args: A) => ({ t, ret, args }),
@@ -11,25 +23,41 @@ const make =
   })
 
 describe('getOffsetAndSize', () => {
-  const makeCase = make(getOffsetAndSize)
+  const makeCase = make()
+  const sizes = { size: 10, length: 11 } as const
   it.each<{
-    ret: ReturnType<typeof getOffsetAndSize>
-    args: Parameters<typeof getOffsetAndSize>
+    ret: readonly [origin: number, innerSize: number, range: Range]
+    args: readonly [
+      offset: number,
+      pageSize: number,
+      totalSize: number,
+      // sizes: Sizes,
+      sticky: StickyPosition | null,
+    ]
+    t: string
   }>([
-    makeCase().title('上端').exp([0, 60], 0, 20, 110),
-    makeCase().title('途中').exp([15, 75], 15, 20, 110),
-    makeCase().title('途中').exp([25, 85], 25, 20, 110),
-    makeCase().title('途中').exp([40, 100], 45, 20, 110),
-    makeCase().title('途中').exp([40, 95], 55, 20, 110),
-    makeCase().title('下端').exp([40, 60], 90, 20, 110),
+    makeCase()
+      .title('上端')
+      .exp([0, 60, [0, 6]], 0, 20, 110, null),
+    makeCase()
+      .title('途中')
+      .exp([15, 75, [0, 6]], 15, 20, 110, null),
+    // 新しい origin が大きくずれるなら更新？
 
-    makeCase().title('少ない行数').exp([0, 20], -5, 20, 20),
-    makeCase().title('少ない行数').exp([0, 20], 0, 20, 20),
-    makeCase().title('少ない行数').exp([0, 20], 5, 20, 20),
-    makeCase().title('少ない行数').exp([0, 20], 10, 20, 20),
+    // makeCase().title('途中').exp([25, 85], 25, 20, 110, null),
+    // makeCase().title('途中').exp([40, 100], 45, 20, 110, null),
+    // makeCase().title('途中').exp([40, 95], 55, 20, 110, null),
+    // makeCase().title('下端').exp([40, 60], 90, 20, 110, null),
 
-    makeCase().title('特に少ない行数').exp([0, 10], 10, 20, 10),
-  ])('$args => $ret $t', ({ ret, args }) =>
-    expect(getOffsetAndSize(...args)).toEqual(ret),
-  )
+    // makeCase().title('少ない行数').exp([0, 20], -5, 20, 20, null),
+    // makeCase().title('少ない行数').exp([0, 20], 0, 20, 20, null),
+    // makeCase().title('少ない行数').exp([0, 20], 5, 20, 20, null),
+    // makeCase().title('少ない行数').exp([0, 20], 10, 20, 20, null),
+
+    // makeCase().title('特に少ない行数').exp([0, 10], 10, 20, 10, null),
+  ])('$args => $ret $t', ({ ret, args }) => {
+    const [offset, pageSize, totalSize, sticky] = args
+    const res = getOffsetAndSize(offset, pageSize, totalSize, sizes, sticky)
+    expect(res).toEqual(ret)
+  })
 })
