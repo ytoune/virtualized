@@ -10,7 +10,7 @@ import type {
 import { screenHeight, screenWidth } from './utils'
 import { subscribeScroll } from './with-scroll'
 import { createItemStyle, outerStyle } from './format'
-import { createController } from './controller-2'
+import { createController } from './controller'
 // import { createVirtualizedVariable } from './variable'
 // import { createVirtualizedFixed } from './fixed'
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createController } from './controller-2'
+import { createController } from './controller'
 import type { ScrollContainer, StickyPosition } from './interfaces'
 
 describe('createController', () => {
