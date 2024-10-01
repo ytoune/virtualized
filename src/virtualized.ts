@@ -95,8 +95,8 @@ const createOnScroll = (
     if (false !== r2 || false !== c2) {
       scrolling = true
       const scrollProps: { top?: number; left?: number } = {}
-      if ('number' === typeof r2 && r2) scrollProps.top = r2
-      if ('number' === typeof c2 && c2) scrollProps.left = c2
+      if ('number' === typeof r2) scrollProps.top = r2
+      if ('number' === typeof c2) scrollProps.left = c2
       pin()
       if (scrollProps.top || scrollProps.left) scrollImpl(scrollProps)
       Promise.resolve().then(() => (scrolling = false))

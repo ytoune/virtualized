@@ -59,8 +59,8 @@ export const createController = ({
   const recalc = (next?: NextState): number | false => {
     if (next) {
       if (void 0 !== next.offset) {
-        if (inKeep(next.offset)) return vo !== next.offset && vo - diff
-        vo = next.offset
+        if (next.offset === vo) return false
+        if (inKeep((vo = next.offset))) return vo - diff
       } else if (void 0 !== next.pageSize) {
         if (next.pageSize === ps) return false
         ps = next.pageSize
