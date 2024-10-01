@@ -1,5 +1,5 @@
 import type { HTMLElement, ScrollContainer, ScrollState } from './interfaces'
-import { screenHeight, screenWidth } from './utils'
+import { screenHeight, screenWidth } from './libs/utils'
 
 const { floor, min, max } = Math
 

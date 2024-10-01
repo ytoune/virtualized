@@ -1,3 +1,5 @@
+import { subscribeScroll } from './with-scroll'
+import { createItemStyle, outerStyle } from './format'
 import type {
   AreaString,
   Controller,
@@ -7,10 +9,8 @@ import type {
   Sticky,
   StickyPosition,
 } from './interfaces'
-import { screenHeight, screenWidth } from './utils'
-import { subscribeScroll } from './with-scroll'
-import { createItemStyle, outerStyle } from './format'
-import { createController } from './controller'
+import { screenHeight, screenWidth } from './libs/utils'
+import { createController } from './libs/controller'
 // import { createVirtualizedVariable } from './variable'
 // import { createVirtualizedFixed } from './fixed'
 

@@ -9,7 +9,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import type { Sizes } from './interfaces'
+import type { Sizes } from '../interfaces'
 import { getRange } from './get-range'
 
 describe('getRange', () => {

@@ -1,4 +1,4 @@
-import type { Sizes, VariableSizes } from './interfaces'
+import type { Sizes, VariableSizes } from '../interfaces'
 import { isArray, binarySearch } from './utils'
 
 const { min, max, floor, ceil } = Math

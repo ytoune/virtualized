@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
+import type { ScrollContainer, StickyPosition } from '../interfaces'
 import { createController } from './controller'
-import type { ScrollContainer, StickyPosition } from './interfaces'
 
 describe('createController', () => {
   // it('hoge', () => {

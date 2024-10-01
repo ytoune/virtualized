@@ -5,7 +5,7 @@ import type {
   ScrollContainer,
   Sizes,
   StickyPosition,
-} from './interfaces'
+} from '../interfaces'
 import { render as getRendered } from './render'
 import { isArray } from './utils'
 

@@ -1,7 +1,7 @@
+import { isArray } from './libs/utils'
 import { createItemStyle } from './format'
-import { getRange } from './get-range'
+import { getRange } from './libs/get-range'
 import type { RenderItem, Sizes, Sticky, StickyPosition } from './interfaces'
-import { isArray } from './utils'
 import type { Scroll } from './with-scroll'
 
 const positionsCaches = new WeakMap<readonly number[], ReadonlySet<number>>()

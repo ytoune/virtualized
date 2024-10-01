@@ -1,3 +1,4 @@
+/** @internal */
 export const getKeep = (
   pageSize: number,
   totalSize: number,

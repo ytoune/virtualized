@@ -1,5 +1,5 @@
+import type { Sizes } from '../interfaces'
 import { getIndex } from './get-index'
-import type { Sizes } from './interfaces'
 
 export const getRange = (
   sizes: Sizes,

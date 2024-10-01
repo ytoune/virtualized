@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
+import type { Sizes } from '../interfaces'
 import { render } from './render'
-import type { Sizes } from './interfaces'
 import { isArray } from './utils'
 
 describe('render', () => {

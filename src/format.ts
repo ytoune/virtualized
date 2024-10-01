@@ -5,7 +5,7 @@ import type {
   Sticky,
   StickyPosition,
 } from './interfaces'
-import { isArray } from './utils'
+import { isArray } from './libs/utils'
 
 const lift = (
   idx: number,

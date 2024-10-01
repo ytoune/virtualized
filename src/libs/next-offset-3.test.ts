@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
+import type { StickyPosition } from '../interfaces'
 import { getOffsetAndSize } from './next-offset-3'
-import type { StickyPosition } from './interfaces'
 
 type Range = readonly [start: number, end: number]
 

@@ -1,33 +1,59 @@
+import type { Sizes, StickyPosition } from '../interfaces'
 import { getIndex } from './get-index'
-import type { Sizes, StickyPosition } from './interfaces'
+
+type Range = readonly [start: number, end: number]
 
 const { min, max } = Math
 const { isArray } = Array as {
   isArray: (v: unknown) => v is readonly unknown[]
 }
 
-/** @internal */
+/**
+ * @todo template をシンプルにするために発行される offset を pageSize に合わせる必要がある…
+ * @internal
+ */
 export const getOffsetAndSize = (
-  origin: number,
+  offset: number,
   pageSize: number,
   totalSize: number,
-): readonly [realOffset: number, size: number] => {
+  sizes: Sizes,
+  sticky: StickyPosition | null,
+): readonly [origin: number, innerSize: number, range: Range] => {
   pageSize = max(0, pageSize)
   totalSize = max(0, totalSize)
-  origin = max(0, min(origin, totalSize - pageSize))
+  offset = max(0, min(offset, totalSize - pageSize))
 
   const ps2 = pageSize * 2
   const ps3 = pageSize + ps2
   const ps5 = ps3 + ps2
 
-  const ro = min(ps2, origin)
-  const sz = min(ps5, min(ps3, totalSize - origin) + ro)
+  const startIndex = getIndex(sizes, offset - ps2, false)
+  const endIndex = getIndex(sizes, offset + ps3, true)
 
-  return [ro, sz]
+  const ro = min(ps2, offset)
+  const sz = min(ps5, min(ps3, totalSize - offset) + ro)
+
+  let top = 0
+  let bot = 0
+
+  if (sticky) {
+    const stickySet = stickyAsSet(sticky)
+    for (let i = 0; i < sizes.length; ++i)
+      if (stickySet.has(i)) {
+        if (i < startIndex) top += isArray(sizes) ? sizes[i]! : sizes.size
+        if (endIndex < i) bot += isArray(sizes) ? sizes[i]! : sizes.size
+      }
+  }
+
+  return [ro + top, sz + top + bot, [startIndex, endIndex]]
 }
 
-/** @internal */
+/**
+ * 固定されている要素の index の Set
+ * @internal
+ */
 const stickyAsSet = (sticky: StickyPosition): ReadonlySet<number> => {
+  if (sticky instanceof Set) return sticky
   const set = new Set<number>()
   if ('number' === typeof sticky) for (let s = 0; s <= sticky; ++s) set.add(s)
   else for (const s of sticky) set.add(s)

@@ -1,4 +1,4 @@
-import type { FixedSizes as Sizes, StickyPosition } from './interfaces'
+import type { FixedSizes as Sizes, StickyPosition } from '../interfaces'
 
 const { min, max } = Math
 

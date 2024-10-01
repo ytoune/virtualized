@@ -1,6 +1,6 @@
+import type { Rendered, RenderedItem, Sizes } from '../interfaces'
 import { getIndex, getPositions } from './get-index'
 import { getKeep } from './get-keep'
-import type { Rendered, RenderedItem, Sizes } from './interfaces'
 import { isArray } from './utils'
 
 const getPosition = (sizes: Sizes, index: number): number =>
