@@ -5,7 +5,7 @@ const { min, max, floor, ceil } = Math
 const positionsCaches = new WeakMap<readonly number[], number[]>()
 
 /** @internal */
-export const getPositions = (s: VariableSizes) => {
+export const getPositions = (s: VariableSizes): readonly number[] => {
   let p = positionsCaches.get(s)
   if (!p) {
     p = []

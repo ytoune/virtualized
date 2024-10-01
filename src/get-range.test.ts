@@ -14,7 +14,7 @@ import { getRange } from './get-range'
 
 describe('getRange', () => {
   const t = (
-    p: `表示領域: ${number}..${number}, コンテンツ: (${number}px * ${number}) -> 描画範囲: ${number}..${number}, (単純描画範囲: ${number}..${number}), 継続範囲: ${number}..${number}, (単純継続範囲: ${number}..${number})`,
+    p: `表示領域: ${number}..${number}, コンテンツ: (${number}px * ${number}) -> 描画範囲: ${number}..${number}, (単純描画範囲: ${number}..${number})`,
   ) => {
     const m = p.match(/\d+/giu)
     if (!m) throw new Error('unknown error.')
@@ -35,7 +35,7 @@ describe('getRange', () => {
       if (tmp < rangePx[1]) ++end
     }
     const range = [start, end] as const
-    const title = `表示領域: ${viewport[0]}..${viewport[1]}, コンテンツ: (${sizes.size}px * ${sizes.length}) -> 描画範囲: ${rangePx[0]}..${rangePx[1]}, (単純描画範囲: ${simpleRangePx[0]}..${simpleRangePx[1]})`
+    const title = `表示領域: ${viewport[0]}..${viewport[1]}, コンテンツ: (${sizes.size}px * ${sizes.length}) -> 描画範囲: ${rangePx[0]}..${rangePx[1]}, (idx: ${start}..${end}), (単純描画範囲: ${simpleRangePx[0]}..${simpleRangePx[1]})`
     return {
       title,
       sizes,
@@ -57,9 +57,9 @@ describe('getRange', () => {
     simpleRangePx?: readonly [start: number, end: number]
   }>[] = [
     ...l(
-      '表示領域: 0..10, コンテンツ: (25px * 9) -> 描画範囲: 0..50, (単純描画範囲: 0..30), 継続範囲: 0..40, (単純継続範囲: 0..20)',
-      '表示領域: 35..45, コンテンツ: (25px * 9) -> 描画範囲: 0..75, (単純描画範囲: 15..65), 継続範囲: 10..65, (単純継続範囲: 25..55)',
-      '表示領域: 50..60, コンテンツ: (25px * 9) -> 描画範囲: 25..100, (単純描画範囲: 30..80), 継続範囲: 35..90, (単純継続範囲: 40..70)',
+      '表示領域: 0..10, コンテンツ: (25px * 9) -> 描画範囲: 0..50, (単純描画範囲: 0..30)',
+      '表示領域: 35..45, コンテンツ: (25px * 9) -> 描画範囲: 0..75, (単純描画範囲: 15..65)',
+      '表示領域: 50..60, コンテンツ: (25px * 9) -> 描画範囲: 25..100, (単純描画範囲: 30..80)',
     ),
   ]
   for (const {
