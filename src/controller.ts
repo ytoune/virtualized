@@ -25,10 +25,6 @@ export const createController = ({
   initOffset,
   defaultPageSize,
 }: CreateProps): Controller => {
-  // const state: ScrollState = {
-  //   offset: initOffset(),
-  //   pageSize: defaultPageSize(),
-  // }
   const virtualTotalSize = getTotal(sizes)
   let vo = initOffset()
   let ps = defaultPageSize()

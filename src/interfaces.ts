@@ -21,6 +21,9 @@ export type RenderItem<T> = (
   style: CellStyle,
 ) => T | null
 
+/**
+ * Destination entity for drawing, such as a div element
+ */
 export interface ScrollContainer {
   readonly offset: number
   readonly pageSize: number
