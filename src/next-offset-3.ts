@@ -1,4 +1,4 @@
-import { getIndex } from './get-range'
+import { getIndex } from './get-index'
 import type { Sizes, StickyPosition } from './interfaces'
 
 type Range = readonly [start: number, end: number]
@@ -48,8 +48,12 @@ export const getOffsetAndSize = (
   return [ro + top, sz + top + bot, [startIndex, endIndex]]
 }
 
-/** @internal */
+/**
+ * 固定されている要素の index の Set
+ * @internal
+ */
 const stickyAsSet = (sticky: StickyPosition): ReadonlySet<number> => {
+  if (sticky instanceof Set) return sticky
   const set = new Set<number>()
   if ('number' === typeof sticky) for (let s = 0; s <= sticky; ++s) set.add(s)
   else for (const s of sticky) set.add(s)

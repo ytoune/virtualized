@@ -1,4 +1,4 @@
-import { getIndex } from './get-range'
+import { getIndex } from './get-index'
 import type { Sizes, StickyPosition } from './interfaces'
 
 const { min, max } = Math

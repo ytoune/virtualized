@@ -28,20 +28,24 @@ describe('getOffsetAndSize', () => {
   it.each<{
     ret: readonly [origin: number, innerSize: number, range: Range]
     args: readonly [
-      offset: number,
-      pageSize: number,
-      totalSize: number,
+      offset: number, // 現在の表示位置
+      pageSize: number, // ビューポートの大きさ
+      totalSize: number, // コンテンツ全体の大きさ
       // sizes: Sizes,
       sticky: StickyPosition | null,
     ]
     t: string
   }>([
+    // スクロール位置が上端にある場合。
+    // コンテンツの最上部が表示される必要がある。
     makeCase()
       .title('上端')
       .exp([0, 60, [0, 6]], 0, 20, 110, null),
+    // 上端から少しスクロールした状態
     makeCase()
       .title('途中')
-      .exp([15, 75, [0, 6]], 15, 20, 110, null),
+      .exp([15, 75, [0, 8]], 15, 20, 110, null),
+    // .exp([15, 75, [0, 6]], 15, 20, 110, null),
     // 新しい origin が大きくずれるなら更新？
 
     // makeCase().title('途中').exp([25, 85], 25, 20, 110, null),
