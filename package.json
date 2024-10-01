@@ -37,32 +37,43 @@
   "license": "MIT",
   "scripts": {
     "build": "unbuild && microbundle -f umd --generateTypes=false --no-sourcemap",
-    "test": "eslint \"**/*.ts\" --ignore-path .gitignore && tsc --noEmit && vitest run --passWithNoTests",
+    "test": "npm run lint && tsc --noEmit && vitest run --passWithNoTests",
+    "lint": "eslint \"{src,scripts}/**/*.{ts,tsx}\"",
+    "lint-fix": "eslint \"{src,scripts}/**/*.{ts,tsx}\" --fix",
     "ts-node": "node -r esbuild-register"
   },
   "dependencies": {},
   "devDependencies": {
+    "@eslint/compat": "1.1.1",
+    "@eslint/eslintrc": "3.1.0",
+    "@eslint/js": "9.11.1",
+    "@types/eslint__eslintrc": "2.1.2",
+    "@types/eslint__js": "8.42.3",
     "@types/node": "20.11.24",
-    "@typescript-eslint/eslint-plugin": "7.1.1",
-    "@typescript-eslint/parser": "7.1.1",
-    "esbuild": "0.20.1",
-    "esbuild-register": "3.5.0",
-    "eslint": "8.57.0",
+    "@typescript-eslint/eslint-plugin": "8.8.0",
+    "@typescript-eslint/parser": "8.8.0",
+    "esbuild": "0.24.0",
+    "esbuild-register": "3.6.0",
+    "eslint": "9.11.1",
     "eslint-config-prettier": "9.1.0",
-    "eslint-import-resolver-typescript": "3.6.1",
-    "eslint-plugin-github": "4.10.2",
-    "eslint-plugin-import": "2.29.1",
+    "eslint-import-resolver-typescript": "3.6.3",
+    "eslint-plugin-github": "5.0.2",
+    "eslint-plugin-import": "2.30.0",
+    "eslint-plugin-prettier": "5.2.1",
+    "globals": "15.9.0",
     "microbundle": "0.15.1",
-    "prettier": "3.2.5",
-    "rimraf": "5.0.5",
-    "typescript": "5.3.3",
+    "prettier": "3.3.3",
+    "rimraf": "6.0.1",
+    "typescript": "5.6.2",
     "unbuild": "2.0.0",
-    "vite": "5.1.5",
-    "vitest": "1.3.1"
+    "vite": "5.4.7",
+    "vitest": "2.1.1"
   },
   "resolutions": {
-    "esbuild": "0.20.1",
-    "vite": "5.1.5"
+    "@typescript-eslint/eslint-plugin": "8.8.0",
+    "@typescript-eslint/parser": "8.8.0",
+    "esbuild": "0.24.0",
+    "vite": "5.4.7"
   },
   "prettier": {
     "useTabs": false,
@@ -71,104 +82,5 @@
     "semi": false,
     "arrowParens": "avoid",
     "htmlWhitespaceSensitivity": "ignore"
-  },
-  "eslintConfig": {
-    "ignorePatterns": [
-      "/node_modules",
-      "/dist",
-      "/.cache",
-      "/.swc",
-      "/scripts/sandbox*"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "project": "./tsconfig.json",
-      "sourceType": "module"
-    },
-    "settings": {
-      "import/resolver": {
-        "typescript": {
-          "alwaysTryTypes": true
-        }
-      }
-    },
-    "env": {
-      "node": true,
-      "jest": true
-    },
-    "plugins": [
-      "@typescript-eslint",
-      "import",
-      "github"
-    ],
-    "extends": [
-      "prettier",
-      "plugin:import/typescript",
-      "plugin:github/recommended",
-      "plugin:github/typescript"
-    ],
-    "rules": {
-      "yoda": [
-        "error",
-        "always",
-        {
-          "exceptRange": true,
-          "onlyEquality": true
-        }
-      ],
-      "complexity": [
-        "error",
-        20
-      ],
-      "prefer-arrow-callback": "error",
-      "arrow-body-style": [
-        "error",
-        "as-needed"
-      ],
-      "func-style": [
-        "error",
-        "expression"
-      ],
-      "no-console": "off",
-      "no-negated-condition": "off",
-      "eslint-comments/no-use": "off",
-      "eslint-comments/no-unlimited-disable": "off",
-      "eslint-comments/no-duplicate-disable": "off",
-      "import/order": "error",
-      "import/no-default-export": "off",
-      "import/no-cycle": "off",
-      "import/no-namespace": "off",
-      "github/no-then": "off",
-      "i18n-text/no-en": "off",
-      "@typescript-eslint/array-type": [
-        "error",
-        {
-          "default": "array"
-        }
-      ],
-      "@typescript-eslint/strict-boolean-expressions": "off",
-      "@typescript-eslint/restrict-template-expressions": [
-        "error",
-        {
-          "allowNumber": true
-        }
-      ],
-      "@typescript-eslint/no-shadow": "off",
-      "@typescript-eslint/consistent-type-imports": [
-        "error",
-        {
-          "fixStyle": "separate-type-imports"
-        }
-      ],
-      "@typescript-eslint/no-unused-vars": [
-        "warn",
-        {
-          "varsIgnorePattern": "^_",
-          "argsIgnorePattern": "^_",
-          "caughtErrorsIgnorePattern": "^_",
-          "ignoreRestSiblings": true
-        }
-      ]
-    }
   }
 }
