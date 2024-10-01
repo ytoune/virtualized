@@ -78,7 +78,7 @@ export const createController = ({
       return false
     }
   }
-  const render = () => ({ range, innerSize: rs, gridTemplate }) as const
+  const render = () => ({ items: range, innerSize: rs, gridTemplate }) as const
   const getState = (): ControllerState => ({
     offset: vo,
     pageSize: ps,
