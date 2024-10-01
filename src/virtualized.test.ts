@@ -57,17 +57,21 @@ describe('virtualized', () => {
       padding: 0,
     })
     expect(r.innerStyle).toEqual({
-      height: '50px',
+      height: '32px',
       width: '6px',
       display: 'grid',
-      gridTemplate: '0px repeat(4, 4px)/0px repeat(1, 6px)',
+      gridTemplate: 'repeat(8,4px)/repeat(1,6px)',
     })
     let list = r.items(renderItem(r.getGridArea))
     expect(list).toEqual([
-      '0,0,0,0-2/2/3/3',
-      '1,0,0,0-3/2/4/3',
-      '2,0,0,0-4/2/5/3',
-      '3,0,0,0-5/2/6/3',
+      '0,0,0,0-1/1/2/2',
+      '1,0,0,0-2/1/3/2',
+      '2,0,0,0-3/1/4/2',
+      '3,0,0,0-4/1/5/2',
+      '4,0,0,0-5/1/6/2',
+      '5,0,0,0-6/1/7/2',
+      '6,0,0,0-7/1/8/2',
+      '7,0,0,0-8/1/9/2',
     ])
 
     await pushDiv(
@@ -81,19 +85,21 @@ describe('virtualized', () => {
     )
     r = v.render()
     expect(r.innerStyle).toEqual({
-      height: '50px',
+      height: '32px',
       width: '6px',
       display: 'grid',
-      gridTemplate: '4px repeat(6, 4px)/0px repeat(1, 6px)',
+      gridTemplate: 'repeat(8,4px)/repeat(1,6px)',
     })
     list = r.items(renderItem(r.getGridArea))
     expect(list).toEqual([
-      '1,0,0,0-2/2/3/3',
-      '2,0,0,0-3/2/4/3',
-      '3,0,0,0-4/2/5/3',
-      '4,0,0,0-5/2/6/3',
-      '5,0,0,0-6/2/7/3',
-      '6,0,0,0-7/2/8/3',
+      '0,0,0,0-1/1/2/2',
+      '1,0,0,0-2/1/3/2',
+      '2,0,0,0-3/1/4/2',
+      '3,0,0,0-4/1/5/2',
+      '4,0,0,0-5/1/6/2',
+      '5,0,0,0-6/1/7/2',
+      '6,0,0,0-7/1/8/2',
+      '7,0,0,0-8/1/9/2',
     ])
 
     await pushDiv(
@@ -107,18 +113,26 @@ describe('virtualized', () => {
     )
     r = v.render()
     expect(r.innerStyle).toEqual({
-      height: '50px',
+      height: '52px',
       width: '6px',
       display: 'grid',
-      gridTemplate: '16px repeat(5, 4px)/0px repeat(1, 6px)',
+      gridTemplate: 'repeat(13,4px)/repeat(1,6px)',
     })
     list = r.items(renderItem(r.getGridArea))
     expect(list).toEqual([
-      '9,0,0,0-2/2/3/3',
-      '10,0,0,0-3/2/4/3',
-      '11,0,0,0-4/2/5/3',
-      '12,0,0,0-5/2/6/3',
-      '13,0,0,0-6/2/7/3',
+      '5,0,0,0-1/1/2/2',
+      '6,0,0,0-2/1/3/2',
+      '7,0,0,0-3/1/4/2',
+      '8,0,0,0-4/1/5/2',
+      '9,0,0,0-5/1/6/2',
+      '10,0,0,0-6/1/7/2',
+      '11,0,0,0-7/1/8/2',
+      '12,0,0,0-8/1/9/2',
+      '13,0,0,0-9/1/10/2',
+      '14,0,0,0-10/1/11/2',
+      '15,0,0,0-11/1/12/2',
+      '16,0,0,0-12/1/13/2',
+      '17,0,0,0-13/1/14/2',
     ])
   })
 })

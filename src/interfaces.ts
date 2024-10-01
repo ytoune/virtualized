@@ -1,5 +1,8 @@
 export type StickyPosition = number | readonly number[] | ReadonlySet<number>
-export type Sticky = Readonly<{ r?: StickyPosition; c?: StickyPosition }> | null
+export type Sticky = Readonly<{
+  r?: StickyPosition | null
+  c?: StickyPosition | null
+}> | null
 
 export type FixedSizes = Readonly<{ size: number; length: number }>
 export type VariableSizes = readonly number[]
@@ -51,6 +54,18 @@ export type NextState =
   | Readonly<{ offset: number; pageSize?: undefined }>
   | Readonly<{ offset?: undefined; pageSize: number }>
 
+export type RenderedItem = readonly [
+  itemIndex: number,
+  gridStart: number,
+  isSticky?: true,
+]
+
+export type Rendered = Readonly<{
+  items: readonly RenderedItem[]
+  innerSize: number
+  gridTemplate: string
+}>
+
 export type Controller = Readonly<{
   sizes: Sizes
   state: () => ControllerState
@@ -63,9 +78,5 @@ export type Controller = Readonly<{
   /**
    * Calculates and returns the values for rendering.
    */
-  render: () => Readonly<{
-    range: readonly (readonly [start: number, end: number, isSticky?: true])[]
-    innerSize: number
-    gridTemplate: string
-  }>
+  render: () => Rendered
 }>

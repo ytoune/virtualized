@@ -1,4 +1,4 @@
-export { createItemStyle, outerStyle, createFormat } from './format'
+export { createItemStyle, createFormat } from './format'
 export { createIdxIter, createItems } from './items'
 export { withScroll, subscribeScroll } from './with-scroll'
 export type { Scroll } from './with-scroll'

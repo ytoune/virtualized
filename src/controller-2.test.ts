@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createController } from './controller-0'
+import { createController } from './controller-2'
 import type { ScrollContainer, StickyPosition } from './interfaces'
 
 describe('createController', () => {
@@ -18,10 +18,10 @@ origin に current を代入して再描画
 
    */
 
-  const gridRange = (start: number, end: number, grid: number) => {
-    const range: [index: number, gridConst: number][] = []
-    for (let i = start, g = grid; i < end; ++i, ++g) range.push([i, g])
-    return range
+  const gridItems = (start: number, end: number, grid: number) => {
+    const items: [index: number, gridConst: number][] = []
+    for (let i = start, g = grid; i < end; ++i, ++g) items.push([i, g])
+    return items
   }
 
   // simple test cases
@@ -73,16 +73,16 @@ origin に current を代入して再描画
       render: {
         // 描画する item の範囲: 0 <= i < 6
         items: [
-          [0, 2],
-          [1, 3],
-          [2, 4],
-          [3, 5],
-          [4, 6],
-          [5, 7],
+          [0, 1],
+          [1, 2],
+          [2, 3],
+          [3, 4],
+          [4, 5],
+          [5, 6],
         ],
         // 裏ではスクロールを考慮してビューポートの５倍までの幅を持たせる
         innerSize: 60,
-        gridTemplate: '0px repeat(6, 10px)',
+        gridTemplate: 'repeat(6,10px)',
       },
     },
   ])('$t $args', ({ args, state, render, scroll }) => {
@@ -129,10 +129,10 @@ origin に current を代入して再描画
     //      20    40    60
     expect(controller.render()).toEqual({
       // 描画する item の範囲: 0 <= i < 6
-      items: gridRange(0, 6, 2),
+      items: gridItems(0, 6, 1),
       // 裏ではスクロールを考慮してビューポートの５倍までの幅を持たせる
       innerSize: 60,
-      gridTemplate: '0px repeat(6, 10px)',
+      gridTemplate: 'repeat(6,10px)',
     })
     // 少しだけスクロールする
     container = { offset: 15, pageSize: 20 }
@@ -144,9 +144,9 @@ origin に current を代入して再描画
     })
     // 閾値を超えるまでは描画範囲はそのまま
     expect(controller.render()).toEqual({
-      items: gridRange(0, 6, 2),
+      items: gridItems(0, 6, 1),
       innerSize: 60,
-      gridTemplate: '0px repeat(6, 10px)',
+      gridTemplate: 'repeat(6,10px)',
     })
     // スクロール量がビューポートサイズを超えた
     container = { offset: 25, pageSize: 20 }
@@ -159,9 +159,9 @@ origin に current を代入して再描画
     // 0  1  2  3  4  5  6  7  8  9 ..
     //      20    40    60    80
     expect(controller.render()).toEqual({
-      items: gridRange(0, 9, 2),
-      innerSize: 85,
-      gridTemplate: '0px repeat(9, 10px)',
+      items: gridItems(0, 9, 1),
+      innerSize: 90,
+      gridTemplate: 'repeat(9,10px)',
     })
   })
 
@@ -188,9 +188,9 @@ origin に current を代入して再描画
       realOffset: 0,
     })
     expect(controller.render()).toEqual({
-      items: gridRange(0, 6, 2),
+      items: gridItems(0, 6, 1),
       innerSize: 60,
-      gridTemplate: '0px repeat(6, 10px)',
+      gridTemplate: 'repeat(6,10px)',
     })
     // 少しだけスクロールする
     container = { offset: 15, pageSize: 20 }
@@ -202,27 +202,24 @@ origin に current を代入して再描画
     })
     // 閾値を超えるまでは描画範囲はそのまま
     expect(controller.render()).toEqual({
-      items: gridRange(0, 6, 2),
+      items: gridItems(0, 6, 1),
       innerSize: 60,
-      gridTemplate: '0px repeat(6, 10px)',
+      gridTemplate: 'repeat(6,10px)',
     })
     // スクロール量がビューポートサイズを超えた
     container = { offset: 25, pageSize: 20 }
     controller.recalc()
     // 0  1  2  3  4  5  6  7  8  9 ..
     //      20    40    60    80
-    /**
-     * @todo template をシンプルにするために発行される offset を pageSize に合わせる必要がある…
-     */
     expect(controller.state()).toEqual({
       offset: 25,
       pageSize: 20,
       realOffset: 25,
     })
     expect(controller.render()).toEqual({
-      items: gridRange(0, 9, 2),
-      innerSize: 85,
-      gridTemplate: '0px repeat(9, 10px)',
+      items: gridItems(0, 9, 1),
+      innerSize: 90,
+      gridTemplate: 'repeat(9,10px)',
     })
     // 大きくスクロール
     container = { offset: 70, pageSize: 20 }
@@ -235,9 +232,9 @@ origin に current を代入して再描画
       realOffset: 50, // 固定分を含めて 50px
     })
     expect(controller.render()).toEqual({
-      items: gridRange(3, 13, 2),
+      items: [[1, 1, true], ...gridItems(3, 13, 2)],
       innerSize: 110,
-      gridTemplate: '0px repeat(10, 10px)',
+      gridTemplate: 'repeat(11,10px)',
     })
   })
 })

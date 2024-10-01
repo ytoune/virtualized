@@ -50,14 +50,16 @@
             pin: () => {
               const r = v.render(sticky)
               Object.assign(outer.current.style, r.outerStyle)
+              outer.current.style.position = 'relative'
               Object.assign(inner.current.style, r.innerStyle)
-              console.log({
-                top: Math.floor(outer.current?.scrollTop ?? 0),
+              window['_current'] = {
+                realTop: Math.floor(outer.current?.scrollTop ?? 0),
+                virtualTop: v.state().scrollTop,
                 'items.length': items.length,
                 ...r.innerStyle,
                 rowRange: r.rowRange,
                 colRange: r.colRange,
-              })
+              }
               pin()
             },
             divRef: () => outer.current,
@@ -80,12 +82,20 @@
             },
             rowSizes,
             colSizes,
+            stickyRows: sticky.r,
+            stickyCols: sticky.c,
           }),
         [colSizes, rowSizes],
       )
+      window['_manager'] = v
       useEffect(v.subscribe, [v])
-      const r = v.render(sticky)
+      const r = v.render()
       const items = r.items(renderItem(r))
+      window['_items'] = () => {
+        const l = []
+        r.items((...a) => l.push(a))
+        return l
+      }
       return items
     })
     const Grid = ({ colSizes, rowSizes }) => {
@@ -119,17 +129,20 @@
     const rowSizes = { size: lineHeight, length: 2_500_000 }
     // const colSizes = [120, ...Array(150).fill(80)]
     const colSizes = [120, 80, 80]
-    // const sticky = { r: [0, 7, 14], c: 0 }
-    const sticky = {}
+    const sticky = { r: [0, 7, 14], c: 0 }
+    // const sticky = {}
     const sizes = { rowSizes, colSizes, sticky }
     const renderItem = o => (r, c) => {
+      window['_o'] = o
       const k = `${r}:${c}`
       const s = {
         ...o.itemStyle(r, c),
         background: (r + c) % 2 ? '#eee' : '#fff',
       }
-      if (s.top) s.color = 'red'
-      if (s.left) s.color = 'blue'
+      let idx = 0
+      if (s.top) (s.color = 'red'), (idx += 1)
+      if (s.left) (s.color = 'blue'), (idx += 1)
+      s.zIndex = idx
       // console.log({ r, c, s, k })
       if (r && c) return span(chars[(r + c - 2) % chars.length], s, k)
       if (r) return span(`r${r}`, s, k)

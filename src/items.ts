@@ -14,9 +14,9 @@ const getCached = (k: readonly number[]) => {
 /** @internal */
 export const createIterImpl = (
   [b, e]: readonly [number, number],
-  s?: StickyPosition,
+  s?: StickyPosition | null,
 ): ((cb: (i: number, p?: true) => void) => void) => {
-  if (void 0 === s)
+  if (null == s)
     return (cb: (i: number) => void) => {
       for (let i = b; i < e; ++i) cb(i)
     }
@@ -36,7 +36,7 @@ export const createIdxIter = (
   sizes: Sizes,
   scrollOffset: number,
   innerSize: number,
-  stickyPosition: StickyPosition | undefined,
+  stickyPosition: StickyPosition | undefined | null,
   overscanSize?: number,
 ) =>
   createIterImpl(

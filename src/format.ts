@@ -7,15 +7,13 @@ import type {
 } from './interfaces'
 import { isArray } from './utils'
 
-const undef = void 0
-
 const lift = (
   idx: number,
   list: Sizes,
-  pos: StickyPosition | undefined,
+  pos: StickyPosition | null,
 ): `${number}px` | undefined => {
-  if (undef === pos) return
-  if ('number' === typeof pos) return idx === pos ? '0px' : undef
+  if (null === pos) return
+  if ('number' === typeof pos) return idx === pos ? '0px' : void 0
   const get = isArray(list) ? (i: number) => list[i]! : () => list.size
   let sum = 0
   for (const i of pos) {
@@ -26,7 +24,7 @@ const lift = (
 
 type LiftMemoTuple = readonly [
   Sizes,
-  StickyPosition | undefined,
+  StickyPosition | null,
   { v: ReturnType<typeof lift> }[],
 ]
 
@@ -38,7 +36,7 @@ const memoizedLift = (
   key: 'row' | 'col',
   idx: number,
   list: Sizes,
-  pos: StickyPosition | undefined,
+  pos: StickyPosition | null,
 ) => {
   const map = liftMemo[key]
   let v = map.get(idx)
@@ -66,8 +64,8 @@ export const createItemStyle = (
 ): CellStyle => {
   const style: CellStyle = { gridArea: getGridArea(row, col) }
   if (sticky) {
-    const top = memoizedLift('row', row, rowSizes, sticky.r)
-    const left = memoizedLift('col', col, colSizes, sticky.c)
+    const top = memoizedLift('row', row, rowSizes, sticky.r ?? null)
+    const left = memoizedLift('col', col, colSizes, sticky.c ?? null)
     if (top || left) {
       style.position = 'sticky'
       if (top) style.top = top
