@@ -4,34 +4,17 @@ import type {
   AreaString,
   Controller,
   HTMLElement,
-  ScrollContainer,
   Sizes,
   Sticky,
   StickyPosition,
 } from './interfaces'
 import { screenHeight, screenWidth } from './libs/utils'
 import { createController } from './libs/controller'
-// import { createVirtualizedVariable } from './variable'
-// import { createVirtualizedFixed } from './fixed'
 
 export interface ScrollProps {
   readonly top?: number
   readonly left?: number
 }
-
-type CreateManagerProps = Readonly<{
-  ref: () => ScrollContainer | null
-  sizes: Sizes
-  sticky: StickyPosition | null
-  initOffset: () => number
-  defaultPageSize: () => number
-}>
-const createManager = (props: CreateManagerProps): Controller =>
-  createController(props)
-// (isArray(props.sizes) ? createVirtualizedVariable : createVirtualizedFixed)(
-//   props as Parameters<typeof createVirtualizedVariable>[0] &
-//     Parameters<typeof createVirtualizedFixed>[0],
-// )
 
 const initOffset = () => 0
 
@@ -53,7 +36,7 @@ export const createVirtualized = ({
   stickyRows = null,
   stickyCols = null,
 }: VirtualizedProps) => {
-  const rows = createManager({
+  const rows = createController({
     ref: () => {
       const div = divRef()
       return div && { offset: div.scrollTop, pageSize: div.clientHeight }
@@ -63,7 +46,7 @@ export const createVirtualized = ({
     defaultPageSize: screenHeight,
     sticky: stickyRows,
   })
-  const cols = createManager({
+  const cols = createController({
     ref: () => {
       const div = divRef()
       return div && { offset: div.scrollLeft, pageSize: div.clientWidth }
