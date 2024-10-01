@@ -4,16 +4,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Document</title>
   <link rel="dns-prefetch" href="https://unpkg.com" />
-  <link
-    rel="preload"
-    href="https://unpkg.com/htm@3/preact/standalone.umd.js"
-    as="script"
-  />
-  <!-- <link
-    rel="preload"
-    href="https://unpkg.com/@ytoune/virtualized/dist/index.umd.js"
-    as="script"
-  /> -->
   <script src="https://unpkg.com/htm@3/preact/standalone.umd.js"></script>
   <!-- <script src="https://unpkg.com/@ytoune/virtualized/dist/index.umd.js"></script> -->
   <script src="../../dist/index.umd.js"></script>
@@ -95,6 +85,9 @@
         const l = []
         r.items((...a) => l.push(a))
         return l
+      }
+      window['_scroll'] = top => {
+        v.scroll(top * lineHeight)
       }
       return items
     })
