@@ -46,7 +46,7 @@ describe('virtualized', () => {
         clientHeight: 10,
         clientWidth: 6,
       },
-      null,
+      { top: 0, left: 0 },
     )
     let r = v.render()
     expect(r.outerStyle).toEqual({
@@ -81,7 +81,7 @@ describe('virtualized', () => {
         clientHeight: 10,
         clientWidth: 6,
       },
-      null,
+      { left: 0 },
     )
     r = v.render()
     expect(r.innerStyle).toEqual({
