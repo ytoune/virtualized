@@ -45,6 +45,7 @@ origin に current を代入して再描画
     }
     scroll?: {
       container: ScrollContainer
+      recalc: number | boolean
       state: {
         offset: number
         pageSize: number
@@ -99,7 +100,7 @@ origin に current を代入して再描画
     if (scroll)
       for (const s of scroll) {
         container = s.container
-        controller.recalc()
+        expect(controller.recalc()).toBe(s.recalc)
         expect(controller.state()).toEqual(s.state)
         expect(controller.render()).toEqual(s.render)
       }
@@ -107,18 +108,13 @@ origin に current を代入して再描画
 
   it('固定がない場合', () => {
     let container = null as null | ScrollContainer
-    const ref = () => container
-    const sizes = { length: 11, size: 10 } as const
-    const sticky = null
-    const initOffset = () => 0
-    const defaultPageSize = () => 20
     container = null
     const controller = createController({
-      ref,
-      sizes,
-      sticky,
-      initOffset,
-      defaultPageSize,
+      ref: () => container,
+      sizes: { length: 11, size: 10 },
+      sticky: null,
+      initOffset: () => 0,
+      defaultPageSize: () => 20,
     })
     expect(controller.state()).toEqual({
       offset: 0,
@@ -136,7 +132,7 @@ origin に current を代入して再描画
     })
     // 少しだけスクロールする
     container = { offset: 15, pageSize: 20 }
-    controller.recalc()
+    expect(controller.recalc()).toBe(false)
     expect(controller.state()).toEqual({
       offset: 15,
       pageSize: 20,
@@ -150,7 +146,7 @@ origin に current を代入して再描画
     })
     // スクロール量がビューポートサイズを超えた
     container = { offset: 25, pageSize: 20 }
-    controller.recalc()
+    expect(controller.recalc()).toBe(25)
     expect(controller.state()).toEqual({
       offset: 25,
       pageSize: 20,
@@ -163,22 +159,31 @@ origin に current を代入して再描画
       innerSize: 90,
       gridTemplate: 'repeat(9,10px)',
     })
+    container = { offset: 90, pageSize: 20 }
+    expect(controller.recalc()).toBe(40)
+    expect(controller.state()).toEqual({
+      offset: 90,
+      pageSize: 20,
+      realOffset: 40,
+    })
+    // 0  1  2  3  4  5  6  7  8  9  0  1  b
+    //                  60    80    00    20
+    expect(controller.render()).toEqual({
+      items: gridItems(5, 11, 1),
+      innerSize: 60,
+      gridTemplate: 'repeat(6,10px)',
+    })
   })
 
   it('固定が上にある場合', () => {
     let container = null as null | ScrollContainer
-    const ref = () => container
-    const sizes = { length: 21, size: 10 } as const
-    const sticky = [1] // 2 行目は固定されていて常に表示
-    const initOffset = () => 0
-    const defaultPageSize = () => 20
     container = null
     const controller = createController({
-      ref,
-      sizes,
-      sticky,
-      initOffset,
-      defaultPageSize,
+      ref: () => container,
+      sizes: { length: 21, size: 10 },
+      sticky: [1], // 2 行目は固定されていて常に表示
+      initOffset: () => 0,
+      defaultPageSize: () => 20,
     })
     // 0  1  2  3  4  5  6  7  8  9 ..
     //      20    40    60
@@ -194,7 +199,7 @@ origin に current を代入して再描画
     })
     // 少しだけスクロールする
     container = { offset: 15, pageSize: 20 }
-    controller.recalc()
+    expect(controller.recalc()).toBe(false)
     expect(controller.state()).toEqual({
       offset: 15,
       pageSize: 20,
@@ -208,7 +213,7 @@ origin に current を代入して再描画
     })
     // スクロール量がビューポートサイズを超えた
     container = { offset: 25, pageSize: 20 }
-    controller.recalc()
+    expect(controller.recalc()).toBe(25)
     // 0  1  2  3  4  5  6  7  8  9 ..
     //      20    40    60    80
     expect(controller.state()).toEqual({
@@ -223,7 +228,58 @@ origin に current を代入して再描画
     })
     // 大きくスクロール
     container = { offset: 70, pageSize: 20 }
-    controller.recalc()
+    expect(controller.recalc()).toBe(50)
+    // 0  1  2  3  4  5  6  7  8  9 10 11 ..
+    //    sss   0    20    40    60    80
+    expect(controller.state()).toEqual({
+      offset: 70,
+      pageSize: 20,
+      realOffset: 50, // 固定分を含めて 50px
+    })
+    expect(controller.render()).toEqual({
+      items: [[1, 1, true], ...gridItems(3, 13, 2)],
+      innerSize: 110,
+      gridTemplate: 'repeat(11,10px)',
+    })
+  })
+
+  it('force scroll', () => {
+    let container = null as null | ScrollContainer
+    container = null
+    const controller = createController({
+      ref: () => container,
+      sizes: { length: 21, size: 10 } as const,
+      sticky: [1], // 2 行目は固定されていて常に表示
+      initOffset: () => 0,
+      defaultPageSize: () => 20,
+    })
+    expect(controller.state()).toEqual({
+      offset: 0,
+      pageSize: 20,
+      realOffset: 0,
+    })
+    expect(controller.render()).toEqual({
+      items: gridItems(0, 6, 1),
+      innerSize: 60,
+      gridTemplate: 'repeat(6,10px)',
+    })
+    // 少しだけスクロールする
+    container = { offset: 15, pageSize: 20 }
+    expect(controller.recalc()).toBe(false)
+    expect(controller.state()).toEqual({
+      offset: 15,
+      pageSize: 20,
+      realOffset: 15,
+    })
+    // 強制移動
+    expect(controller.recalc({ offset: 0 })).toBe(0)
+    expect(controller.state()).toEqual({
+      offset: 0,
+      pageSize: 20,
+      realOffset: 0,
+    })
+    // 大きく強制移動
+    expect(controller.recalc({ offset: 70 })).toBe(50)
     // 0  1  2  3  4  5  6  7  8  9 10 11 ..
     //    sss   0    20    40    60    80
     expect(controller.state()).toEqual({
