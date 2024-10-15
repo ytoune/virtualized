@@ -68,6 +68,7 @@ export type Rendered = Readonly<{
 
 export type Controller = Readonly<{
   sizes: Sizes
+  totalSize: number
   state: () => ControllerState
   /**
    * Recalculates or set the internal state.

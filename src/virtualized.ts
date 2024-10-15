@@ -77,6 +77,8 @@ export const createVirtualized = ({
       scrollLeft: cs.offset,
       innerHeight: rs.pageSize,
       innerWidth: cs.pageSize,
+      scrollHeight: rows.totalSize,
+      scrollWidth: cols.totalSize,
     }
   }
   return { render, onScroll, subscribe, scroll, state } as const

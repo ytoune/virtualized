@@ -88,7 +88,13 @@ export const createController = ({
     pageSize: ps,
     realOffset: vo - diff,
   })
-  return { sizes, render, recalc, state: getState } as const
+  return {
+    sizes,
+    render,
+    recalc,
+    state: getState,
+    totalSize: virtualTotalSize,
+  } as const
 }
 
 /** @internal */
