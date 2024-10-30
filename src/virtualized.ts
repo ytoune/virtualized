@@ -16,8 +16,6 @@ export interface ScrollProps {
   readonly left?: number
 }
 
-const initOffset = () => 0
-
 type State = Readonly<{
   scrollTop: number
   scrollLeft: number
@@ -43,6 +41,7 @@ export type VirtualizedProps = Readonly<{
   colSizes: Sizes
   stickyRows?: StickyPosition | null
   stickyCols?: StickyPosition | null
+  init?: ScrollProps
 }>
 export const createVirtualized = ({
   pin,
@@ -52,6 +51,7 @@ export const createVirtualized = ({
   colSizes,
   stickyRows = null,
   stickyCols = null,
+  init,
 }: VirtualizedProps) => {
   const rows = createController({
     ref: () => {
@@ -59,7 +59,7 @@ export const createVirtualized = ({
       return div && { offset: div.scrollTop, pageSize: div.clientHeight }
     },
     sizes: rowSizes,
-    initOffset,
+    initOffset: () => init?.top ?? 0,
     defaultPageSize: screenHeight,
     sticky: stickyRows,
   })
@@ -69,7 +69,7 @@ export const createVirtualized = ({
       return div && { offset: div.scrollLeft, pageSize: div.clientWidth }
     },
     sizes: colSizes,
-    initOffset,
+    initOffset: () => init?.left ?? 0,
     defaultPageSize: screenWidth,
     sticky: stickyCols,
   })
