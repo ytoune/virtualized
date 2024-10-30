@@ -18,6 +18,23 @@ export interface ScrollProps {
 
 const initOffset = () => 0
 
+type State = Readonly<{
+  scrollTop: number
+  scrollLeft: number
+  innerHeight: number
+  innerWidth: number
+  scrollHeight: number
+  scrollWidth: number
+}>
+type Subscription = {
+  unsubscribe: () => void
+}
+type Observable<T> = {
+  subscribe: (
+    next: ((v: T) => void) | { readonly next: (v: T) => void },
+  ) => Subscription
+}
+
 export type VirtualizedProps = Readonly<{
   pin: () => void
   divRef: () => HTMLElement | null
@@ -56,12 +73,28 @@ export const createVirtualized = ({
     defaultPageSize: screenWidth,
     sticky: stickyCols,
   })
+  const subscribers = new Set<(s: State) => void>()
+  const state$: Observable<State> = {
+    subscribe: f => {
+      const g = 'function' === typeof f ? f : f.next
+      subscribers.add(g)
+      return {
+        unsubscribe: () => {
+          subscribers.delete(g)
+        },
+      }
+    },
+  }
   const { onScroll, scroll } = createOnScroll(
     rows,
     cols,
     pin,
     divRef,
     scrollImpl,
+    () => {
+      const s = state()
+      for (const f of subscribers) f(s)
+    },
   )
   const sticky: Sticky | undefined =
     null !== stickyRows || null !== stickyCols
@@ -69,7 +102,7 @@ export const createVirtualized = ({
       : void 0
   const render = () => renderImpl(rows, cols, sticky)
   const subscribe = () => subscribeScroll(divRef, onScroll)
-  const state = () => {
+  const state = (): State => {
     const rs = rows.state()
     const cs = cols.state()
     return {
@@ -81,7 +114,7 @@ export const createVirtualized = ({
       scrollWidth: cols.totalSize,
     }
   }
-  return { render, onScroll, subscribe, scroll, state } as const
+  return { render, onScroll, subscribe, scroll, state, state$ } as const
 }
 
 /** @internal */
@@ -91,6 +124,7 @@ const createOnScroll = (
   pin: () => void,
   divRef: () => HTMLElement | null,
   scrollImpl: (props: ScrollProps) => void,
+  handleScroll: () => void,
 ) => {
   let scrolling = false
   const move = (r2?: number | boolean, c2?: number | boolean) => {
@@ -104,6 +138,7 @@ const createOnScroll = (
         scrollImpl(scrollProps)
       Promise.resolve().then(() => (scrolling = false))
     }
+    handleScroll()
   }
   const onScroll = () => {
     const div = divRef()
