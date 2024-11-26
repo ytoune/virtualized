@@ -136,7 +136,8 @@ const createOnScroll = (
       pin()
       if (void 0 !== scrollProps.top || void 0 !== scrollProps.left)
         scrollImpl(scrollProps)
-      Promise.resolve().then(() => (scrolling = false))
+      // Promise.resolve().then(() => (scrolling = false))
+      setTimeout(() => (scrolling = false))
     }
     handleScroll()
   }
