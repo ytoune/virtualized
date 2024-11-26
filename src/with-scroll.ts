@@ -63,6 +63,12 @@ export const subscribeScroll = (
 ): Unsubscribe => {
   const cleans: (() => void)[] = []
   try {
+    /**
+     * @todo 削除すべき
+     *
+     * init で現在の状態は渡されるので再計算は必要ない。
+     * 必要なら使い手が明示的に行うはず。
+     */
     onScrollOrResize()
     window.addEventListener('resize', onScrollOrResize, { passive: true })
     cleans.push(() => window.removeEventListener('resize', onScrollOrResize))
