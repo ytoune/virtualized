@@ -51,8 +51,9 @@ export type ControllerState = Readonly<{
 }>
 
 export type NextState =
-  | Readonly<{ offset: number; pageSize?: undefined }>
-  | Readonly<{ offset?: undefined; pageSize: number }>
+  | Readonly<{ offset: number; pageSize?: undefined; realOffset?: undefined }>
+  | Readonly<{ offset?: undefined; pageSize: number; realOffset?: undefined }>
+  | Readonly<{ offset?: undefined; pageSize?: undefined; realOffset: number }>
 
 export type RenderedItem = readonly [
   itemIndex: number,

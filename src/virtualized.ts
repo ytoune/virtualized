@@ -162,8 +162,8 @@ const createOnScroll = (
     const div = divRef()
     if (!div || scrolling) return
     move(
-      rows.recalc({ offset: div.scrollTop }),
-      cols.recalc({ offset: div.scrollLeft }),
+      rows.recalc({ realOffset: div.scrollTop }),
+      cols.recalc({ realOffset: div.scrollLeft }),
     )
   }
   const onResize = () => {
