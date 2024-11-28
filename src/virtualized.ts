@@ -30,6 +30,7 @@ type State = Readonly<{
 }>
 type Subscription = {
   unsubscribe: () => void
+  readonly closed: boolean
 }
 type Observable<T> = {
   subscribe: (
@@ -86,11 +87,14 @@ export const createVirtualized = ({
     subscribe: f => {
       const g = 'function' === typeof f ? f : f.next
       subscribers.add(g)
-      return {
+      const subscription = {
         unsubscribe: () => {
+          subscription.closed = true
           subscribers.delete(g)
         },
+        closed: false,
       }
+      return subscription
     },
   }
   const { onScroll, onResize, scroll } = createOnScroll(
