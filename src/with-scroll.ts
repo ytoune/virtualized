@@ -79,11 +79,14 @@ export const subscribeScroll = (
   divRef: () => HTMLElement | null,
   onScroll: () => void,
   onResize: () => void = onScroll,
+  doResize = true,
 ): Unsubscribe => {
   const cleans: (() => void)[] = []
   try {
-    // 正しい画面サイズの取得
-    onResize()
+    if (doResize) {
+      // 正しい画面サイズの取得
+      onResize()
+    }
     window.addEventListener('resize', onResize, { passive: true })
     cleans.push(() => window.removeEventListener('resize', onResize))
     const observer = new ResizeObserver(onResize)

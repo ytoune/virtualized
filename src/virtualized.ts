@@ -15,6 +15,10 @@ export interface ScrollProps {
   readonly top?: number
   readonly left?: number
 }
+export interface ViewportSize {
+  readonly height: number
+  readonly width: number
+}
 
 type State = Readonly<{
   scrollTop: number
@@ -42,6 +46,7 @@ export type VirtualizedProps = Readonly<{
   stickyRows?: StickyPosition | null
   stickyCols?: StickyPosition | null
   init?: ScrollProps
+  viewportSize?: () => ViewportSize
 }>
 export const createVirtualized = ({
   pin,
@@ -52,6 +57,7 @@ export const createVirtualized = ({
   stickyRows = null,
   stickyCols = null,
   init,
+  viewportSize,
 }: VirtualizedProps) => {
   const rows = createController({
     ref: () => {
@@ -60,6 +66,7 @@ export const createVirtualized = ({
     },
     sizes: rowSizes,
     initOffset: () => init?.top ?? 0,
+    initPageSize: viewportSize && (() => viewportSize().height),
     defaultPageSize: screenHeight,
     sticky: stickyRows,
   })
@@ -70,6 +77,7 @@ export const createVirtualized = ({
     },
     sizes: colSizes,
     initOffset: () => init?.left ?? 0,
+    initPageSize: viewportSize && (() => viewportSize().width),
     defaultPageSize: screenWidth,
     sticky: stickyCols,
   })
@@ -101,7 +109,8 @@ export const createVirtualized = ({
       ? { r: stickyRows, c: stickyCols }
       : void 0
   const render = () => renderImpl(rows, cols, sticky)
-  const subscribe = () => subscribeScroll(divRef, onScroll, onResize)
+  const subscribe = () =>
+    subscribeScroll(divRef, onScroll, onResize, !viewportSize)
   const state = (): State => {
     const rs = rows.state()
     const cs = cols.state()

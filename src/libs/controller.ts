@@ -16,6 +16,7 @@ export type CreateProps = Readonly<{
   sizes: Sizes
   sticky: StickyPosition | null
   initOffset: () => number
+  initPageSize?: () => number
   /** ウィンドウのサイズなどそのとき考え得る最大のビューポートの大きさ */
   defaultPageSize: () => number
 }>
@@ -24,6 +25,7 @@ export const createController = ({
   sizes,
   sticky: stickyData,
   initOffset,
+  initPageSize,
   defaultPageSize,
 }: CreateProps): Controller => {
   const virtualTotalSize = getTotal(sizes)
@@ -32,7 +34,7 @@ export const createController = ({
   /** 実際に html 要素に描画を行う元のコンテンツ全体における範囲の開始位置 */
   let vo = initOffset()
   /** 実際に html 要素に描画を行う元のコンテンツ全体における範囲の大きさ */
-  let ps = defaultPageSize()
+  let ps = initPageSize?.() ?? defaultPageSize()
 
   /** vo と実際の offset の差 ( `vo === ro + diff` ) */
   let diff!: number
