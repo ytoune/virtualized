@@ -85,7 +85,7 @@ export const createVirtualized = ({
       }
     },
   }
-  const { onScroll, scroll } = createOnScroll(
+  const { onScroll, onResize, scroll } = createOnScroll(
     rows,
     cols,
     pin,
@@ -101,7 +101,7 @@ export const createVirtualized = ({
       ? { r: stickyRows, c: stickyCols }
       : void 0
   const render = () => renderImpl(rows, cols, sticky)
-  const subscribe = () => subscribeScroll(divRef, onScroll)
+  const subscribe = () => subscribeScroll(divRef, onScroll, onResize)
   const state = (): State => {
     const rs = rows.state()
     const cs = cols.state()
@@ -114,7 +114,15 @@ export const createVirtualized = ({
       scrollWidth: cols.totalSize,
     }
   }
-  return { render, onScroll, subscribe, scroll, state, state$ } as const
+  return {
+    render,
+    onScroll,
+    onResize,
+    subscribe,
+    scroll,
+    state,
+    state$,
+  } as const
 }
 
 /** @internal */
@@ -144,7 +152,18 @@ const createOnScroll = (
   const onScroll = () => {
     const div = divRef()
     if (!div || scrolling) return
-    move(rows.recalc(), cols.recalc())
+    move(
+      rows.recalc({ offset: div.scrollTop }),
+      cols.recalc({ offset: div.scrollLeft }),
+    )
+  }
+  const onResize = () => {
+    const div = divRef()
+    if (!div || scrolling) return
+    move(
+      rows.recalc({ pageSize: div.clientHeight }),
+      cols.recalc({ pageSize: div.clientWidth }),
+    )
   }
   const scroll = (top?: number, left?: number) => {
     move(
@@ -152,7 +171,7 @@ const createOnScroll = (
       void 0 !== left ? cols.recalc({ offset: left }) : void 0,
     )
   }
-  return { onScroll, scroll } as const
+  return { onScroll, onResize, scroll } as const
 }
 
 /** @internal */

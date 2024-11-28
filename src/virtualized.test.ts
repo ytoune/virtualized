@@ -26,11 +26,26 @@ describe('virtualized', () => {
       rowSizes: { size: 4, length: 25 }, // total 100
       colSizes: { size: 6, length: 1 }, // total 6
     })
-    const pushDiv = async (d: HTMLElement, p: ScrollProps | null) => {
+    const pushDiv = async (
+      d: HTMLElement,
+      p: ScrollProps | null,
+      k: 'onScroll' | 'onResize',
+    ) => {
+      if (null === div) {
+        expect(k).toBe('onResize')
+      } else {
+        if ('onResize' === k) {
+          expect(div.scrollLeft).toBe(d.scrollLeft)
+          expect(div.scrollTop).toBe(d.scrollTop)
+        } else {
+          expect(div.clientHeight).toBe(d.clientHeight)
+          expect(div.clientWidth).toBe(d.clientWidth)
+        }
+      }
       div = d
       calledProp = []
       pinned = 0
-      v.onScroll()
+      v[k]()
       await new Promise<void>(r => setTimeout(r, 1))
       expect(calledProp).toEqual(null !== p ? [p] : [])
       expect(pinned).toBe(1)
@@ -47,6 +62,7 @@ describe('virtualized', () => {
         clientWidth: 6,
       },
       { top: 0, left: 0 },
+      'onResize',
     )
     let r = v.render()
     expect(r.outerStyle).toEqual({
@@ -81,7 +97,9 @@ describe('virtualized', () => {
         clientHeight: 10,
         clientWidth: 6,
       },
-      { left: 0 },
+      // { left: 0 },
+      { top: 10 },
+      'onScroll',
     )
     r = v.render()
     expect(r.innerStyle).toEqual({
@@ -109,7 +127,8 @@ describe('virtualized', () => {
         clientHeight: 10,
         clientWidth: 6,
       },
-      { top: 21, left: 0 },
+      { top: 21 },
+      'onScroll',
     )
     r = v.render()
     expect(r.innerStyle).toEqual({

@@ -23,16 +23,29 @@ export const updateState = (
     : prevState
 }
 
+const ON_SCROLL = 1
+const ON_RESIZE = 2
+type ON_SCROLL = typeof ON_SCROLL
+type ON_RESIZE = typeof ON_RESIZE
+
 /** @internal */
-const updateScroll = (prevScroll: Scroll, div: HTMLElement): Scroll => {
+const updateScroll = (
+  prevScroll: Scroll,
+  div: HTMLElement,
+  type: ON_SCROLL | ON_RESIZE,
+): Scroll => {
   const top = updateState(
     prevScroll.top,
-    { offset: div.scrollTop, pageSize: div.clientHeight },
+    type === ON_SCROLL
+      ? { offset: div.scrollTop, pageSize: prevScroll.top.pageSize }
+      : { offset: prevScroll.top.offset, pageSize: div.clientHeight },
     screenHeight,
   )
   const left = updateState(
     prevScroll.left,
-    { offset: div.scrollLeft, pageSize: div.clientWidth },
+    type === ON_SCROLL
+      ? { offset: div.scrollLeft, pageSize: prevScroll.left.pageSize }
+      : { offset: prevScroll.left.offset, pageSize: div.clientWidth },
     screenWidth,
   )
   return top !== prevScroll.top || left !== prevScroll.left
@@ -49,36 +62,37 @@ export const withScroll = ({ divRef, set }: ScrollProps) => {
   const init = getInitted()
   const onScroll = () => {
     const div = divRef()
-    if (div) set(e => updateScroll(e, div))
+    if (div) set(e => updateScroll(e, div, ON_SCROLL))
   }
-  const subscribe = (): Unsubscribe => subscribeScroll(divRef, onScroll)
-  return { init, onScroll, subscribe } as const
+  const onResize = () => {
+    const div = divRef()
+    if (div) set(e => updateScroll(e, div, ON_RESIZE))
+  }
+  const subscribe = (): Unsubscribe =>
+    subscribeScroll(divRef, onScroll, onResize)
+  return { init, onScroll, onResize, subscribe } as const
 }
 
 type Unsubscribe = () => void
 
 export const subscribeScroll = (
   divRef: () => HTMLElement | null,
-  onScrollOrResize: () => void,
+  onScroll: () => void,
+  onResize: () => void = onScroll,
 ): Unsubscribe => {
   const cleans: (() => void)[] = []
   try {
-    /**
-     * @todo 削除すべき
-     *
-     * init で現在の状態は渡されるので再計算は必要ない。
-     * 必要なら使い手が明示的に行うはず。
-     */
-    onScrollOrResize()
-    window.addEventListener('resize', onScrollOrResize, { passive: true })
-    cleans.push(() => window.removeEventListener('resize', onScrollOrResize))
-    const observer = new ResizeObserver(onScrollOrResize)
+    // 正しい画面サイズの取得
+    onResize()
+    window.addEventListener('resize', onResize, { passive: true })
+    cleans.push(() => window.removeEventListener('resize', onResize))
+    const observer = new ResizeObserver(onResize)
     cleans.push(() => observer.disconnect())
     const div = divRef()
     if (div instanceof Element) {
       observer.observe(div)
-      div.addEventListener('scroll', onScrollOrResize, { passive: true })
-      cleans.push(() => div.removeEventListener('scroll', onScrollOrResize))
+      div.addEventListener('scroll', onScroll, { passive: true })
+      cleans.push(() => div.removeEventListener('scroll', onScroll))
     }
   } catch (x) {
     // pass
