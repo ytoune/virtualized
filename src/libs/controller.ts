@@ -5,6 +5,7 @@ import type {
   ScrollContainer,
   Sizes,
   StickyPosition,
+  NextState,
 } from '../interfaces'
 import { render as getRendered } from './render'
 import { isArray } from './utils'
@@ -57,7 +58,6 @@ export const createController = ({
 
   recalcVar()
 
-  type NextState = Readonly<{ offset?: number; pageSize?: number }>
   const recalc = (next?: NextState): number | false => {
     if (next) {
       if (void 0 !== next.offset) {
