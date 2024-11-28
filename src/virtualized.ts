@@ -146,8 +146,8 @@ const createOnScroll = (
         scrollImpl(scrollProps)
       // Promise.resolve().then(() => (scrolling = false))
       setTimeout(() => (scrolling = false))
+      handleScroll()
     }
-    handleScroll()
   }
   const onScroll = () => {
     const div = divRef()
