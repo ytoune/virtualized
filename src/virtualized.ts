@@ -27,6 +27,8 @@ type State = Readonly<{
   innerWidth: number
   scrollHeight: number
   scrollWidth: number
+  realScrollTop: number
+  realScrollLeft: number
 }>
 type Subscription = {
   unsubscribe: () => void
@@ -125,6 +127,8 @@ export const createVirtualized = ({
       innerWidth: cs.pageSize,
       scrollHeight: rows.totalSize,
       scrollWidth: cols.totalSize,
+      realScrollTop: rs.realOffset,
+      realScrollLeft: cs.realOffset,
     }
   }
   return {
