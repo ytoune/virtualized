@@ -8,7 +8,7 @@ import type {
   NextState,
 } from '../interfaces'
 import { render as getRendered } from './render'
-import { isArray } from './utils'
+import { getTotal, createStickyManager } from './utils'
 
 const { min, max } = Math
 
@@ -101,35 +101,4 @@ export const createController = ({
     state: getState,
     totalSize: virtualTotalSize,
   } as const
-}
-
-/** @internal */
-const getTotal = (sizes: Sizes) => {
-  if (isArray(sizes)) {
-    let sum = 0
-    for (let i = 0; i < sizes.length; ++i) sum += sizes[i]!
-    return sum
-  }
-  const { length: count, size } = sizes
-  return count * size
-}
-
-/** @internal */
-const createStickyManager = (
-  sticky: StickyPosition | null,
-): Readonly<{
-  /** 固定されている要素の index の配列 */
-  arr: readonly number[]
-  /** 固定されている要素の index の Set */
-  set: ReadonlySet<number>
-}> => {
-  let set: Set<number>
-  if (sticky instanceof Set) set = sticky
-  else {
-    set = new Set()
-    if ('number' === typeof sticky) for (let s = 0; s <= sticky; ++s) set.add(s)
-    else if (sticky) for (const s of sticky) set.add(s)
-  }
-  const arr: readonly number[] = Array.from(set).sort((q, w) => q - w)
-  return { arr, set }
 }
