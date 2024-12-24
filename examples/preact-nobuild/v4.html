@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <link rel="dns-prefetch" href="https://unpkg.com" />
+  <script src="https://unpkg.com/htm@3/preact/standalone.umd.js"></script>
+  <!-- <script src="https://unpkg.com/@ytoune/virtualized/dist/index.umd.js"></script> -->
+  <script src="../../dist/index.umd.js"></script>
+  <style>
+    main {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <main></main>
+  <script>
+    const { render } = htmPreact
+    const { Component, useRef, useReducer, useEffect, useMemo } = htmPreact
+    const { html } = htmPreact
+    const { createReducer, subscribeScroll } = virtualized
+
+    const memo = F =>
+      class extends Component {
+        shouldComponentUpdate() {
+          return false
+        }
+        render(props) {
+          return html`
+            <${F} ...${props} />
+          `
+        }
+      }
+
+    const gridContent = ({ outer, inner }) => {
+      const [, pin] = useReducer(s => s + 1n, 0n)
+      const state = (useRef(null).current ??= {})
+      const log = (...mes) => {
+        console.log(...mes, {
+          vo: state.row.offset,
+          ro: state.row.realOffset,
+          // ps: state.row.pageSize,
+          df: state.row.diff,
+          bt: state.row.offset + state.row.pageSize,
+          keep: state.row.keep.join(','),
+        })
+      }
+      const v = useMemo(() => {
+        let scrolling = false
+        const createStickyPositionMap = (sizes, sticky) => {
+          const map = new Map()
+          const arr =
+            'number' === typeof sticky
+              ? [sticky]
+              : Array.from(new Set(sticky)).sort((q, w) => q - w)
+          let sum = 0
+          for (const v of arr) {
+            map.set(v, sum)
+            if (Array.isArray(sizes)) sum += sizes[v]
+            else sum += sizes.size
+          }
+          return map
+        }
+        const row = createReducer(rowSizes, sticky.r)
+        const col = createReducer(colSizes, sticky.c)
+        const rowMap = createStickyPositionMap(rowSizes, sticky.r)
+        const colMap = createStickyPositionMap(colSizes, sticky.c)
+        state.row ??= row.init(0, window.innerHeight)
+        state.col ??= col.init(0, window.innerWidth)
+        const outerStyle = {
+          width: '100%',
+          height: '100%',
+          overflow: 'scroll',
+          margin: 0,
+          padding: 0,
+        }
+        const innerStyle = () => ({
+          height: `${state.row.rendered.innerSize}px`,
+          width: `${state.col.rendered.innerSize}px`,
+          display: 'grid',
+          gridTemplate: `${state.row.rendered.gridTemplate}/${state.col.rendered.gridTemplate}`,
+        })
+        const watched =
+          (...picks) =>
+          f =>
+          (...a) => {
+            const prev = picks.map(p => p())
+            f(...a)
+            if (picks.some((p, i) => p() !== prev[i])) pin()
+          }
+        return {
+          outerStyle: () => outerStyle,
+          innerStyle,
+          subscribe: () => {
+            return subscribeScroll(
+              () => outer.current,
+              watched(
+                () => state.row.rendered,
+                () => state.col.rendered,
+              )(() => {
+                if (scrolling) return
+                state.row = row.reducer(state.row, {
+                  realOffset: outer.current.scrollTop,
+                })
+                log('on scroll')
+                state.col = col.reducer(state.col, {
+                  realOffset: outer.current.scrollLeft,
+                })
+              }),
+              watched(
+                () => state.row.rendered,
+                () => state.col.rendered,
+              )(() => {
+                state.row = row.reducer(state.row, {
+                  pageSize: inner.current.clientHeight,
+                })
+                log('on resize')
+                state.col = col.reducer(state.col, {
+                  pageSize: inner.current.clientWidth,
+                })
+              }),
+              true,
+            )
+          },
+          render: () => {
+            let s = null
+            const itemStyle = () => s
+            const items = f => {
+              const ret = []
+              for (const [r, r0] of state.row.rendered.items)
+                for (const [c, c0] of state.col.rendered.items) {
+                  s = { gridArea: `${r0}/${c0}/${r0 + 1}/${c0 + 1}` }
+                  if (rowMap.has(r)) s.top = `${rowMap.get(r)}px`
+                  if (colMap.has(c)) s.left = `${colMap.get(c)}px`
+                  if (s.top || s.left) s.position = 'sticky'
+                  const item = f(r, c)
+                  if (item) ret.push(item)
+                }
+              return ret
+            }
+            return { items, itemStyle }
+          },
+          scroll: watched(() => state.row.rendered)(offset => {
+            state.row = row.reducer(state.row, { offset })
+            log('set scrollTop')
+            scrolling = true
+            outer.current.scrollTop = state.row.realOffset
+            scrolling = false
+          }),
+        }
+      }, [colSizes, rowSizes])
+      window['_manager'] = v
+      useEffect(v.subscribe, [v])
+      const r = v.render()
+      const items = r.items(renderItem(r))
+      window['_items'] = () => {
+        const l = []
+        r.items((...a) => l.push(a))
+        return l
+      }
+      window['_scroll'] = top => {
+        v.scroll(top * lineHeight)
+      }
+      log('render')
+      return { items, outerStyle: v.outerStyle, innerStyle: v.innerStyle }
+    }
+    const Grid = memo(() => {
+      const outer = useRef(null)
+      const inner = useRef(null)
+      const c = gridContent({ outer, inner })
+      return html`
+        <div ref=${outer} style=${c.outerStyle()}>
+          <div ref=${inner} style=${c.innerStyle()}>${c.items}</div>
+        </div>
+      `
+    })
+    const fontSize = 16
+    const lineHeight = fontSize * 1.5
+    const span = (text, s, k) => html`
+      <span
+        style=${{
+          lineHeight: `${lineHeight}px`,
+          textAlign: 'end',
+          color: '#000',
+          background: '#fff',
+          ...s,
+        }}
+        key=${k}
+      >
+        ${text}
+      </span>
+    `
+    const chars = [...'abcdefghijklmnopqrstuvwxyz']
+    const rowSizes = { size: lineHeight, length: 2_500_000 }
+    // const colSizes = [120, ...Array(150).fill(80)]
+    const colSizes = [120, 80, 80]
+    const sticky = { r: [0, 7, 14], c: 0 }
+    // const sticky = {}
+    const sizes = { rowSizes, colSizes, sticky }
+    const renderItem = o => (r, c) => {
+      window['_o'] = o
+      const k = `${r}:${c}`
+      const s = {
+        ...o.itemStyle(r, c),
+        background: (r + c) % 2 ? '#eee' : '#fff',
+      }
+      let idx = 0
+      if (s.top) (s.color = 'red'), (idx += 1)
+      if (s.left) (s.color = 'blue'), (idx += 1)
+      s.zIndex = idx
+      // console.log({ r, c, s, k })
+      if (r && c) return span(chars[(r + c - 2) % chars.length], s, k)
+      if (r) return span(`r${r}`, s, k)
+      if (c) return span(`c${c}`, s, k)
+      return span(null, s, k)
+    }
+    const App = () => html`
+      <${Grid} rowSizes=${rowSizes} colSizes=${colSizes} />
+    `
+    render(
+      html`
+        <div style=${{ position: 'absolute', inset: 0 }}>
+          <${App} />
+        </div>
+      `,
+      document.querySelector('main'),
+    )
+  </script>
+</html>
